@@ -5,8 +5,8 @@ import java.math.*;
 public class SensorNode {
 	private int NodeNumber;
 	private double range;
-	private double xPosition;
-	private double yPosition;
+	private float xPosition;
+	private float yPosition;
 	private int numberOfClass;
 	private double Pmove;
 	CacheMemory cache=new CacheMemory();
@@ -67,15 +67,15 @@ public class SensorNode {
 		return this.status;
 	}
 	
-	public void setX(double number1){
+	public void setX(float number1){
 		this.xPosition=number1;
 	}
 	
-	public double getX(){
+	public float getX(){
 		return this.xPosition;
 	}
 	
-	public void setY(double number2){
+	public void setY(float number2){
 		this.yPosition=number2;
 	}
 	
@@ -147,7 +147,7 @@ public class SensorNode {
 	//For each node we find his neighbors. To do that we calculate the Eucleidian distance
 	//of every neighbor.If it's smaller than node's range(root of 2 in our experiment) then 
 	//we add this neighbor to the neighbors's list.
-	public void findNeighbors(Vector nodes){
+	public void findNeighbors(ArrayList<SensorNode> nodes){
 		neighbors=new Vector();
 		SensorNode temp;
 		double distance;
@@ -160,7 +160,7 @@ public class SensorNode {
 				break;
 			}
 			
-			temp=(SensorNode)(nodes.elementAt(i));
+			temp=nodes.get(i);
 			distance=Math.sqrt(Math.pow((this.getX()-temp.getX()),2)+Math.pow((this.getY()-temp.getY()), 2));
 			if(distance<range)
 			{
@@ -172,7 +172,7 @@ public class SensorNode {
 		for(k=i;k<nodes.size();k++)
 		{
 			
-			temp=(SensorNode)(nodes.elementAt(k));
+			temp=nodes.get(k);
 			distance=Math.sqrt(Math.pow((this.getX()-temp.getX()),2)+Math.pow((this.getY()-temp.getY()), 2));
 			if(distance<range)
 			{

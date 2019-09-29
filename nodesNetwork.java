@@ -1,3 +1,5 @@
+import javax.xml.soap.Node;
+import java.util.ArrayList;
 import java.util.Random;
 import java.util.Vector;
 
@@ -10,11 +12,11 @@ public class nodesNetwork {
 	private int numberOfNodes=20;
 	private double tolerance=1.0;
 	private int numberOfClasses=1;
-	private Vector NodesList;
-	private double broadcastedValues[][]=new double[100][100];
+	private ArrayList<SensorNode> NodesList;
+	private float broadcastedValues[][]=new float[100][100];
 	int clasum[]=new int[100];
 	
-	public Vector getNodesList(){
+	public ArrayList<SensorNode> getNodesList(){
 		return this.NodesList;
 	}
 	
@@ -31,7 +33,7 @@ public class nodesNetwork {
 	public void partitionIntoClasses()
 	{
 		int i,number;
-		double Prob[]=new double[numberOfClasses];
+		float Prob[]=new float[numberOfClasses];
 	
 		for(i=0;i<100;i++)
 		{
@@ -39,24 +41,21 @@ public class nodesNetwork {
 		}
 		
 		Random randomGen3=new Random();
-		
-		for(i=0;i<NodesList.size();i++)
-		{
-			number=randomGen3.nextInt(numberOfClasses);
-			((SensorNode)(this.NodesList.elementAt(i))).setNumberOfClass(number);
-			clasum[number]++;
-		}
-	
+
 		for(i=0;i<numberOfClasses;i++)
 		{
-			Prob[i]=(double)(randomGen3.nextInt(11))/10;
+			Prob[i]=(float)(randomGen3.nextInt(11))/10;
 			if(Prob[i]<=0.1)
-				{Prob[i]=(double)(randomGen3.nextInt(11))/10;}
+			{Prob[i]=(float)(randomGen3.nextInt(11))/10;}
 		}
-	
-		for(i=0;i<NodesList.size();i++)
+
+		for(SensorNode temp:NodesList)
 		{
-			((SensorNode)(this.NodesList.elementAt(i))).setPmove(Prob[((SensorNode)(this.NodesList.elementAt(i))).getNumberOfClass()]);
+			number=randomGen3.nextInt(numberOfClasses);
+			temp.setNumberOfClass(number);
+			clasum[number]++;
+			temp.setPmove(Prob[temp.getNumberOfClass()]);
+
 		}
 		
 	}
@@ -66,20 +65,20 @@ public class nodesNetwork {
 	public void createNetwork(){
 		Random randomGen1=new Random();
 		Random randomGen2=new Random();
-		NodesList=new Vector();
-		double number1,number2;
+		NodesList=new ArrayList<SensorNode>();
+		float number1,number2;
 		int i;
 			
 		for(i=0;i<numberOfNodes;i++)
 		{
-			number1=randomGen1.nextDouble();
-			number2=randomGen2.nextDouble();
+			number1=randomGen1.nextFloat();
+			number2=randomGen2.nextFloat();
 			
 			SensorNode networkNode=new SensorNode();
 			networkNode.setNodeNumber(i+1);
 			networkNode.setX(number1);
 			networkNode.setY(number2);
-			
+
 			NodesList.add(networkNode);
 		}
 		
@@ -87,11 +86,8 @@ public class nodesNetwork {
 
 	//At the beginning we assume that every node is represented by all of his neighbors
 	public void initialize(){
-		int i;
-		SensorNode temp;
-		for(i=0;i<this.NodesList.size();i++)
+		for(SensorNode temp:NodesList)
 		{
-			temp=(SensorNode)(NodesList.elementAt(i));
 			temp.setRepresentatives((Vector) (temp.getNeighbors()).clone());
 		}
 	}
@@ -108,11 +104,11 @@ public class nodesNetwork {
 	//Finally we have another stage of changing nodes' values but without storing them in cache.
 	public void training(){
 		int i,k,l;
-		SensorNode temp = null;
+
 		SensorNode temp2= null;
 		SensorNode temp3= null;
 		Random randomGen1=new Random();
-		double measurement,probability;
+		float measurement,probability;
 		int trainingTimes,changeValues;
 		int plusminus;
 		MemoryPair cachepair=new MemoryPair();
@@ -135,32 +131,35 @@ public class nodesNetwork {
 				{
 					
 					plusminus=randomGen1.nextInt(2);
+					probability=(float)(randomGen1.nextInt(11))/10;
 					
 					for(l=0;l<this.numberOfNodes;l++)
 					{
-					temp3=(SensorNode)(NodesList.elementAt(l));
-					measurement=randomGen1.nextDouble();
-					probability=(double)(randomGen1.nextInt(11))/10;
-					if(plusminus==0 && temp3.getNumberOfClass()==k && temp3.getPmove()>=probability)
-					{
-						this.broadcastedValues[l][trainingTimes]=this.broadcastedValues[l][trainingTimes-1]+measurement;
-					}
+						temp3=NodesList.get(l);
+						measurement=randomGen1.nextFloat();
+
+
+						if(plusminus==0 && temp3.getNumberOfClass()==k && temp3.getPmove()>=probability)
+						{
+							this.broadcastedValues[l][trainingTimes]=this.broadcastedValues[l][trainingTimes-1]+measurement;
+						}
 				
-					if(plusminus==1 && temp3.getNumberOfClass()==k && temp3.getPmove()>=probability)
-					{
-						this.broadcastedValues[l][trainingTimes]=this.broadcastedValues[l][trainingTimes-1]-measurement;
-					}
-					if(temp3.getPmove()<probability)
-						this.broadcastedValues[l][trainingTimes]=this.broadcastedValues[l][trainingTimes-1];
+						if(plusminus==1 && temp3.getNumberOfClass()==k && temp3.getPmove()>=probability)
+						{
+							this.broadcastedValues[l][trainingTimes]=this.broadcastedValues[l][trainingTimes-1]-measurement;
+						}
+						if(temp3.getPmove()<probability)
+							this.broadcastedValues[l][trainingTimes]=this.broadcastedValues[l][trainingTimes-1];
 				}
 			}
 			
 			}
 		
 		int j;
+		SensorNode temp = null;
 		for(i=0;i<this.NodesList.size();i++)
 		{
-			temp=(SensorNode)(NodesList.elementAt(i));
+			temp = NodesList.get(i);
 			for(j=0;j<temp.getNeighbors().size();j++)
 			{
 				cachepair=new MemoryPair();
@@ -185,11 +184,12 @@ public class nodesNetwork {
 			for(k=0;k<this.numberOfClasses;k++)
 			{
 				plusminus=randomGen1.nextInt(2);
+				probability=randomGen1.nextFloat();
 				for(l=0;l<this.numberOfNodes;l++)
 				{
-					temp3=(SensorNode)(NodesList.elementAt(l));
-					measurement=randomGen1.nextDouble();
-					probability=randomGen1.nextDouble();
+					temp3 = NodesList.get(l);
+					measurement=randomGen1.nextFloat();
+
 					if(plusminus==0 && temp3.getNumberOfClass()==k && temp3.getPmove()>=probability)
 					{
 						this.broadcastedValues[l][trainingTimes]=this.broadcastedValues[l][trainingTimes-1]+measurement;
@@ -205,11 +205,13 @@ public class nodesNetwork {
 		}
 			
 			
-		
+
 		int j;
+		SensorNode temp = null;
+
 		for(i=0;i<this.NodesList.size();i++)
 		{
-			temp=(SensorNode)(NodesList.elementAt(i));
+			temp = NodesList.get(i);
 			for(j=0;j<temp.getNeighbors().size();j++)
 			{
 				cachepair=new MemoryPair();
@@ -233,11 +235,12 @@ public class nodesNetwork {
 				{
 					
 					plusminus=randomGen1.nextInt(2);
+					probability=randomGen1.nextFloat();
 					for(l=0;l<this.numberOfNodes;l++)
 					{
-						temp3=(SensorNode)(NodesList.elementAt(l));
-						measurement=randomGen1.nextDouble();
-						probability=randomGen1.nextDouble();
+						temp3=NodesList.get(l);
+						measurement=randomGen1.nextFloat();
+
 						if(plusminus==0 && temp3.getNumberOfClass()==k && temp3.getPmove()>=probability)
 						{
 							if(changeValues==10)
@@ -281,7 +284,7 @@ public class nodesNetwork {
 		
 		for(i=0;i<this.NodesList.size();i++)
 		{
-			temp=(SensorNode)(NodesList.elementAt(i));
+			temp=NodesList.get(i);
 			for(j=0;j<temp.getNeighbors().size();j++)
 			{
 				amount=0;
@@ -317,12 +320,11 @@ public class nodesNetwork {
 	
 	public void breakties()
 	{
-		SensorNode temp,temp2;
+		SensorNode temp2;
 		String state=new String();
-		int i;
-		for(i=0;i<this.NodesList.size();i++)
+
+		for(SensorNode temp:NodesList)
 		{
-			temp=(SensorNode)(NodesList.elementAt(i));
 			temp2=(SensorNode)(temp.getRepresentatives().elementAt(0));
 			if((temp2.getRepresentatives().elementAt(0)).equals(temp)==true)
 			{
@@ -334,11 +336,8 @@ public class nodesNetwork {
 	}
 	public void NoreprenentativeStayActive()
 	{
-		SensorNode temp;
-		int i;
-		for(i=0;i<this.NodesList.size();i++)
+		for(SensorNode temp:NodesList)
 		{
-			temp=(SensorNode)(NodesList.elementAt(i));
 			if(temp.getRepresentatives().elementAt(0).equals(temp))
 				temp.setStatus("active");
 		}
@@ -346,11 +345,8 @@ public class nodesNetwork {
 	
 	public void recallRedundant()
 	{
-		SensorNode temp;
-		int i;
-		for(i=0;i<this.NodesList.size();i++)
+		for(SensorNode temp:NodesList)
 		{
-			temp=(SensorNode)(NodesList.elementAt(i));
 			if(temp.getStatus()=="active" && temp.getRepresentatives().elementAt(0)!=temp)
 			{
 				temp.getRepresentatives().remove(0);
@@ -367,11 +363,11 @@ public class nodesNetwork {
 		int i,j;
 		for(i=0;i<this.NodesList.size();i++)
 		{
-			temp=(SensorNode)(NodesList.elementAt(i));
+			temp=NodesList.get(i);
 			if(temp.getRepresentatives().elementAt(0).equals(temp)==false)
 				for(j=0;j<this.NodesList.size();j++)
 				{
-					temp2=(SensorNode)(NodesList.elementAt(j));
+					temp2=NodesList.get(i);
 					if(temp2.getRepresentatives().elementAt(0).equals(temp)==true)
 						representative=true;
 				}
@@ -386,11 +382,9 @@ public class nodesNetwork {
 	
 	public void finalcleanup()
 	{
-		int i;
-		SensorNode temp;
-		for(i=0;i<this.NodesList.size();i++)
+
+		for(SensorNode temp:NodesList)
 		{
-			temp=(SensorNode)(NodesList.elementAt(i));
 			if(temp.getStatus()=="active" && temp.getRepresentatives().elementAt(0).equals(temp)==false)
 				temp.getRepresentatives().remove(0);
 			temp.getRepresentatives().add(temp);

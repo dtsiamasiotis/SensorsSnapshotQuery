@@ -1,16 +1,16 @@
 
 public class MemoryPair {
-	private double Xi;
-	private double Xj;
+	private float Xi;
+	private float Xj;
 	private int inode;
 	private int jnode;
 	
-	public void setXi(double d)
+	public void setXi(float d)
 	{
 		this.Xi=d;
 	}
 	
-	public void setXj(double value)
+	public void setXj(float value)
 	{
 		this.Xj=value;
 	}

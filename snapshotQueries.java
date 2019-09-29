@@ -9,118 +9,70 @@ public class snapshotQueries {
 	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		SensorNode komvos;
+		final SensorNode[] komvos = new SensorNode[1];
 		Vector repres=new Vector(); 
 		Integer represnum=new Integer(0);
-		
-		
-		int i;
-		
-		
+
+		int i = 0;
+
 		/*Experiment One*/
-		
+		long startTime = System.nanoTime();
 		System.out.println("Experiment One");
-		int classes,repetitions,repressum=0,undefined=0,active,passive;
+		int classes;
+		int repetitions;
+		int repressum = 0;
+		int undefined=0;
+		int active;
+		int passive;
 		int[] average=new int[20];
-		nodesNetwork networkOfNodes2=new nodesNetwork();
-		networkOfNodes2.createNetwork();
+		firstExperiment[] Tests = new firstExperiment[10];
 		
 		for(classes=1;classes<=100;classes=classes+5)
 		{
 			repres.clear();
-			repressum=0;
+			repressum =0;
 			undefined=0;
 			active=0;
 			passive=0;
-			
-			for (i=0;i<networkOfNodes2.getNodesList().size();i++)
-			{
-				komvos=(SensorNode)(networkOfNodes2.getNodesList().elementAt(i));
-				komvos.clearVectors();
-				komvos.clearCache();
-			}
+
+
 					
 			for(repetitions=0;repetitions<10;repetitions++)
 			{
-				repres.clear();
-				
-		
-				for (i=0;i<networkOfNodes2.getNodesList().size();i++)
-				{
-					komvos=(SensorNode)(networkOfNodes2.getNodesList().elementAt(i));
-					komvos.clearVectors();
+				Tests[repetitions] = new firstExperiment(classes);
+				Tests[repetitions].start();
+
+			 }
+			for(repetitions=0;repetitions<10;repetitions++)
+			{
+
+				try {
+					Tests[repetitions].join();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
 				}
-				
-				networkOfNodes2.setNumberOfClasses(classes);
-				networkOfNodes2.partitionIntoClasses();
-		
-				for (i=0;i<networkOfNodes2.getNodesList().size();i++)
-				{
-					komvos=(SensorNode)(networkOfNodes2.getNodesList().elementAt(i));
-					komvos.setrange(Math.sqrt(200));
-					komvos.clearCache();
-					komvos.findNeighbors(networkOfNodes2.getNodesList());
-				}
-		
-				networkOfNodes2.initialize();
-		
-				networkOfNodes2.training();
-		
-				for (i=0;i<networkOfNodes2.getNodesList().size();i++)
-				{
-					komvos=(SensorNode)(networkOfNodes2.getNodesList().elementAt(i));
-					komvos.modelBuild();
-				}
-	
-				for (i=0;i<networkOfNodes2.getNodesList().size();i++)
-				{
-					komvos=(SensorNode)(networkOfNodes2.getNodesList().elementAt(i));
-					komvos.createEstimates();
-				}
-		
-				networkOfNodes2.createCandidateLists();
-		
-				for (i=0;i<networkOfNodes2.getNodesList().size();i++)
-				{
-					komvos=(SensorNode)(networkOfNodes2.getNodesList().elementAt(i));
-					komvos.checkCandidateList();
-				}
-		
-		
-				networkOfNodes2.breakties();
-				networkOfNodes2.NoreprenentativeStayActive();
-				networkOfNodes2.recallRedundant();
-				networkOfNodes2.passiveMode();
-				networkOfNodes2.finalcleanup();
-		
-	
-				SensorNode num;
-		
-				for (i=0;i<networkOfNodes2.getNodesList().size();i++)
-				{
-					komvos=(SensorNode)(networkOfNodes2.getNodesList().elementAt(i));
-					num=(SensorNode)komvos.getRepresentatives().elementAt(0);
-					if(repres.contains(num)==false){
-						repres.add(num);
-					}
-				}
-		
-				repressum=repressum+repres.size();
-		
-			 } 
-				average[classes/5]=repressum/10;
+
+			}
+			for(repetitions=0;repetitions<10;repetitions++)
+			{
+				repressum = repressum + (Tests[repetitions].getRepresSize());
+			}
+
+				average[classes/5]= repressum /10;
 		
 		}
 		
-			for(i=1;i<=100;i=i+5)
+			for(i = 1; i <=100; i = i +5)
 			{
-				System.out.println("Number of classes: "+i+" Representatives: "+average[i/5]);
+				System.out.println("Number of classes: "+ i +" Representatives: "+average[i /5]);
 			}
 		
-		
+		long endTime = System.nanoTime();
+		long elapsedTime = (endTime - startTime)/1000000;
+		System.out.println("Elapsed time in ms:"+elapsedTime);
 		/*Experiment Two*/
 		
-			System.out.println("\nExperiment Two");
+			/*System.out.println("\nExperiment Two");
 			double rangerep;
 			int g;
 			int[][] exp2temp=new int[13][5];
@@ -133,53 +85,53 @@ public class snapshotQueries {
 				for(g=0;g<5;g++)
 				{
 					repres.clear();
-					repressum=0;
+					repressum[0] =0;
 			
-					for (i=0;i<networkOfNodes2.getNodesList().size();i++)
+					for (i[0] =0; i[0] <networkOfNodes2.getNodesList().size(); i[0]++)
 					{
-						komvos=(SensorNode)(networkOfNodes2.getNodesList().elementAt(i));
-						komvos.clearVectors();
-						komvos.clearCache();
+						komvos[0] =networkOfNodes2.getNodesList().get(i[0]);
+						komvos[0].clearVectors();
+						komvos[0].clearCache();
 					}
 					for(repetitions=0;repetitions<10;repetitions++)
 					{
 						repres.clear();
 						classes=K[g];
 						
-						for (i=0;i<networkOfNodes2.getNodesList().size();i++)
+						for (i[0] =0; i[0] <networkOfNodes2.getNodesList().size(); i[0]++)
 						{
-							komvos=(SensorNode)(networkOfNodes2.getNodesList().elementAt(i));
-							komvos.clearVectors();
+							komvos[0] =networkOfNodes2.getNodesList().get(i[0]);
+							komvos[0].clearVectors();
 						}
 						networkOfNodes2.setNumberOfClasses(classes);
 						networkOfNodes2.partitionIntoClasses();
-						for (i=0;i<networkOfNodes2.getNodesList().size();i++)
+						for (i[0] =0; i[0] <networkOfNodes2.getNodesList().size(); i[0]++)
 						{
-							komvos=(SensorNode)(networkOfNodes2.getNodesList().elementAt(i));
-							komvos.setrange(rangerep/10.0);
-							komvos.clearCache();
-							komvos.findNeighbors(networkOfNodes2.getNodesList());
+							komvos[0] =networkOfNodes2.getNodesList().get(i[0]);
+							komvos[0].setrange(rangerep/10.0);
+							komvos[0].clearCache();
+							komvos[0].findNeighbors(networkOfNodes2.getNodesList());
 						}
 					
 						networkOfNodes2.initialize();
 						networkOfNodes2.training();
 						
-						for (i=0;i<networkOfNodes2.getNodesList().size();i++)
+						for (i[0] =0; i[0] <networkOfNodes2.getNodesList().size(); i[0]++)
 						{
-							komvos=(SensorNode)(networkOfNodes2.getNodesList().elementAt(i));
-							komvos.modelBuild();
+							komvos[0] =networkOfNodes2.getNodesList().get(i[0]);
+							komvos[0].modelBuild();
 						}
-						for (i=0;i<networkOfNodes2.getNodesList().size();i++)
+						for (i[0] =0; i[0] <networkOfNodes2.getNodesList().size(); i[0]++)
 						{
-							komvos=(SensorNode)(networkOfNodes2.getNodesList().elementAt(i));
-							komvos.createEstimates();
+							komvos[0] =networkOfNodes2.getNodesList().get(i[0]);
+							komvos[0].createEstimates();
 						}
 		
 						networkOfNodes2.createCandidateLists();
-						for (i=0;i<networkOfNodes2.getNodesList().size();i++)
+						for (i[0] =0; i[0] <networkOfNodes2.getNodesList().size(); i[0]++)
 						{
-							komvos=(SensorNode)(networkOfNodes2.getNodesList().elementAt(i));
-							komvos.checkCandidateList();
+							komvos[0] =networkOfNodes2.getNodesList().get(i[0]);
+							komvos[0].checkCandidateList();
 						}	
 		
 		
@@ -192,19 +144,19 @@ public class snapshotQueries {
 	
 						SensorNode num;
 		
-						for (i=0;i<networkOfNodes2.getNodesList().size();i++)
+						for (i[0] =0; i[0] <networkOfNodes2.getNodesList().size(); i[0]++)
 						{
-							komvos=(SensorNode)(networkOfNodes2.getNodesList().elementAt(i));
-							num=(SensorNode)komvos.getRepresentatives().elementAt(0);
+							komvos[0] =networkOfNodes2.getNodesList().get(i[0]);
+							num=(SensorNode) komvos[0].getRepresentatives().elementAt(0);
 							if(repres.contains(num)==false)
 								repres.add(num);
 		
 						}
-						repressum=repressum+repres.size();
+						repressum[0] = repressum[0] +repres.size();
 	
 			}
 			
-					exp2temp[(int) (rangerep-2)][g]=repressum/10;
+					exp2temp[(int) (rangerep-2)][g]= repressum[0] /10;
 				}
 			
 			}	
@@ -212,11 +164,11 @@ public class snapshotQueries {
 			{	
 				System.out.println();
 				System.out.println("Number of classes: "+K[g]);
-				for(i=0;i<13;i++)
+				for(i[0] =0; i[0] <13; i[0]++)
 				{
-					System.out.println("Range "+((double)(i+2)/10) +":"+ exp2temp[i][g]);
+					System.out.println("Range "+((double)(i[0] +2)/10) +":"+ exp2temp[i[0]][g]);
 				}
-			}
+			}*/
 	
 	}
 }
