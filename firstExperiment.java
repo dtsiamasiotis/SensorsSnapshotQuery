@@ -19,62 +19,62 @@ public class firstExperiment extends Thread {
     @Override
     public void run() {
 
-        nodesNetwork networkOfNodes2=new nodesNetwork();
-        networkOfNodes2.createNetwork();
-        for (SensorNode komvos:networkOfNodes2.getNodesList())
+        nodesNetwork network=new nodesNetwork.Builder(100).withDimensions(1,1).build();
+        network.createNetwork();
+        for (SensorNode komvos:network.getNodesList())
         {
 
             komvos.clearVectors();
             komvos.clearCache();
         }
 
-        for (SensorNode komvos:networkOfNodes2.getNodesList())
+        for (SensorNode komvos:network.getNodesList())
         {
             komvos.clearVectors();
         }
 
-        networkOfNodes2.setNumberOfClasses(numOfClasses);
-        networkOfNodes2.partitionIntoClasses();
+        network.setNumberOfClasses(numOfClasses);
+        network.partitionIntoClasses();
 
-        for (SensorNode komvos:networkOfNodes2.getNodesList())
+        for (SensorNode komvos:network.getNodesList())
         {
             komvos.setrange(Math.sqrt(200));
             komvos.clearCache();
-            komvos.findNeighbors(networkOfNodes2.getNodesList());
+            komvos.findNeighbors(network.getNodesList());
         }
 
-        networkOfNodes2.initialize();
+        network.initialize();
 
-        networkOfNodes2.training();
+        network.training();
 
-        for (SensorNode komvos:networkOfNodes2.getNodesList())
+        for (SensorNode komvos:network.getNodesList())
         {
             komvos.modelBuild();
         }
 
-        for (SensorNode komvos:networkOfNodes2.getNodesList())
+        for (SensorNode komvos:network.getNodesList())
         {
             komvos.createEstimates();
         }
 
-        networkOfNodes2.createCandidateLists();
+        network.createCandidateLists();
 
-        for (SensorNode komvos:networkOfNodes2.getNodesList())
+        for (SensorNode komvos:network.getNodesList())
         {
             komvos.checkCandidateList();
         }
 
 
-        networkOfNodes2.breakties();
-        networkOfNodes2.NoreprenentativeStayActive();
-        networkOfNodes2.recallRedundant();
-        networkOfNodes2.passiveMode();
-        networkOfNodes2.finalcleanup();
+        network.breakties();
+        network.NoreprenentativeStayActive();
+        network.recallRedundant();
+        network.passiveMode();
+        network.finalcleanup();
 
 
         SensorNode num;
 
-        for (SensorNode komvos:networkOfNodes2.getNodesList())
+        for (SensorNode komvos:network.getNodesList())
         {
             num=(SensorNode)komvos.getRepresentatives().elementAt(0);
             if(repres.contains(num)==false){

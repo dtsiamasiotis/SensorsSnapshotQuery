@@ -11,7 +11,7 @@ public class SensorNode {
 	private double Pmove;
 	CacheMemory cache=new CacheMemory();
 	private Vector representatives;
-	private Vector neighbors;
+	private LinkedList<SensorNode> neighbors;
 	private Vector isRepresenting;
 	private Vector candidateList=new Vector();
 	private Vector receivedMeasurements;
@@ -20,6 +20,7 @@ public class SensorNode {
 	private double[][] estimatedMeasurements;
 	private String status="undefined";
 	private int test=0;
+	private HashMap<Integer,Measurement> measurements = new HashMap<Integer, Measurement>();
 	
 	public void setNodeNumber(int value){
 		this.NodeNumber=value;
@@ -93,7 +94,7 @@ public class SensorNode {
 		return this.numberOfClass;
 	}
 	
-	public Vector getNeighbors(){
+	public LinkedList<SensorNode> getNeighbors(){
 		return this.neighbors;
 	}
 	
@@ -142,42 +143,27 @@ public class SensorNode {
 	{
 		this.cache=new CacheMemory();
 	}
+
+	public HashMap<Integer,Measurement> getMeasurements(){return this.measurements;}
 	
 	
 	//For each node we find his neighbors. To do that we calculate the Eucleidian distance
 	//of every neighbor.If it's smaller than node's range(root of 2 in our experiment) then 
 	//we add this neighbor to the neighbors's list.
 	public void findNeighbors(ArrayList<SensorNode> nodes){
-		neighbors=new Vector();
-		SensorNode temp;
+		neighbors=new LinkedList<SensorNode>();
 		double distance;
-		int i;
-		for(i=0;i<nodes.size();i++)
+
+		for(SensorNode temp:nodes)
 		{
-			if(i==this.getNodeNumber()-1)
-			{
-				i++;
-				break;
-			}
-			
-			temp=nodes.get(i);
+			if(temp.getNodeNumber() == this.getNodeNumber())
+				continue;
+
 			distance=Math.sqrt(Math.pow((this.getX()-temp.getX()),2)+Math.pow((this.getY()-temp.getY()), 2));
 			if(distance<range)
 			{
 				this.neighbors.add(temp);
-				
-			}
-		}
-		int k;
-		for(k=i;k<nodes.size();k++)
-		{
-			
-			temp=nodes.get(k);
-			distance=Math.sqrt(Math.pow((this.getX()-temp.getX()),2)+Math.pow((this.getY()-temp.getY()), 2));
-			if(distance<range)
-			{
-				this.neighbors.add(temp);
-				
+
 			}
 		}
 		
@@ -195,7 +181,7 @@ public class SensorNode {
 		
 		for(k=0;k<this.neighbors.size();k++)
 		{
-			Nj=(int)((SensorNode)(this.neighbors.elementAt(k))).NodeNumber;
+			Nj=(int)((SensorNode)(this.neighbors.get(k))).NodeNumber;
 			
 			n=0;
 			for(i=0;i<100;i++)
@@ -255,7 +241,7 @@ public class SensorNode {
 		for(k=0;k<this.neighbors.size();k++)
 		{
 		
-			Nj=(int)((SensorNode)(this.neighbors.elementAt(k))).NodeNumber;
+			Nj=(int)((SensorNode)(this.neighbors.get(k))).NodeNumber;
 			n=0;
 			for(i=0;i<100;i++)
 				for(j=0;j<3;j++)
@@ -296,7 +282,7 @@ public class SensorNode {
 		
 		for(i=0;i<this.neighbors.size();i++)
 		{
-			tempnode=(SensorNode)(this.neighbors.elementAt(i));
+			tempnode=(SensorNode)(this.neighbors.get(i));
 			for(j=0;j<tempnode.candidateList.size();j++)
 			{
 				tempnode2=(SensorNode)(tempnode.candidateList.elementAt(j));
@@ -331,7 +317,7 @@ public class SensorNode {
 		
 		for(i=0;i<this.neighbors.size();i++)
 		{
-			tempnode=(SensorNode)(this.neighbors.elementAt(i));
+			tempnode=(SensorNode)(this.neighbors.get(i));
 			if(tempnode.getNodeNumber()==k)
 			{
 				
@@ -342,7 +328,7 @@ public class SensorNode {
 		for(i=0;i<offer.length && offer[i][0]!=-1;i++)
 		{
 			for(j=0;j<this.neighbors.size();j++){
-			tempnode=(SensorNode)(this.neighbors.elementAt(j));
+			tempnode=(SensorNode)(this.neighbors.get(j));
 			if(tempnode.getNodeNumber()==offer[i][0] && tempnode.getNodeNumber()!=k)
 			tempnode.candidateList.remove(this);
 			}
@@ -619,5 +605,51 @@ public class SensorNode {
 		
 		no_answer=tempsum/amount;
 		return no_answer;
+	}
+
+	public void createNewMeasurement(int curTime)
+	{
+		Measurement newMeasurement = new Measurement(curTime);
+		Random randomGen = new Random();
+		int plusminus = randomGen.nextInt(2);
+		float curValue = randomGen.nextFloat();
+		float previousValue = measurements.get(curTime-1).getValue();
+		if(plusminus == 0)
+			newMeasurement.setValue(previousValue + curValue);
+		else if(plusminus == 1)
+			newMeasurement.setValue(previousValue - curValue);
+
+		newMeasurement.setTime(curTime);
+		measurements.put(curTime,newMeasurement);
+	}
+
+	public void initializeNodeWithValue(int upperBound)
+	{
+		Measurement newMeasurement = new Measurement(0);
+		Random randomGen = new Random();
+		float initialValue = randomGen.nextFloat() * upperBound;
+		newMeasurement.setValue(initialValue);
+		measurements.put(0,newMeasurement);
+	}
+
+	public void broadcastMeasurement(int time)
+	{
+		Measurement toBroadcast = measurements.get(time);
+
+		for(SensorNode neighbor:this.getNeighbors())
+		{
+			neighbor.receiveMeasurementFromNetwork(this.getNodeNumber(),toBroadcast);
+		}
+	}
+
+	public void receiveMeasurementFromNetwork(int senderId, Measurement received)
+	{
+		this.updateCache(received);
+
+	}
+
+	public void updateCache(Measurement received)
+	{
+
 	}
 }

@@ -7,8 +7,8 @@ import java.util.Vector;
 public class nodesNetwork {
 
 	
-	private double dimensionX=1;
-	private double dimensionY=1;
+	private float dimensionX=1;
+	private float dimensionY=1;
 	private int numberOfNodes=20;
 	private double tolerance=1.0;
 	private int numberOfClasses=1;
@@ -164,7 +164,7 @@ public class nodesNetwork {
 			{
 				cachepair=new MemoryPair();
 				cachepair.setinode(i+1);
-				temp2=((SensorNode)(temp.getNeighbors().elementAt(j)));
+				temp2=((SensorNode)(temp.getNeighbors().get(j)));
 				cachepair.setjnode(temp2.getNodeNumber());
 				cachepair.setXi(this.broadcastedValues[temp.getNodeNumber()-1][trainingTimes]);
 				cachepair.setXj(this.broadcastedValues[temp2.getNodeNumber()-1][trainingTimes]);
@@ -216,7 +216,7 @@ public class nodesNetwork {
 			{
 				cachepair=new MemoryPair();
 				cachepair.setinode(i+1);
-				temp2=((SensorNode)(temp.getNeighbors().elementAt(j)));
+				temp2=((SensorNode)(temp.getNeighbors().get(j)));
 				cachepair.setjnode(temp2.getNodeNumber());
 				cachepair.setXi(this.broadcastedValues[temp.getNodeNumber()-1][trainingTimes]);
 				cachepair.setXj(this.broadcastedValues[temp2.getNodeNumber()-1][trainingTimes]);
@@ -288,7 +288,7 @@ public class nodesNetwork {
 			for(j=0;j<temp.getNeighbors().size();j++)
 			{
 				amount=0;
-				temp2=((SensorNode)(temp.getNeighbors().elementAt(j)));
+				temp2=((SensorNode)(temp.getNeighbors().get(j)));
 				lastEstim=((temp.getaStar(j)) * (this.broadcastedValues[temp.getNodeNumber()-1][98]))+temp.getbStar(j);
 				
 				
@@ -390,8 +390,51 @@ public class nodesNetwork {
 			temp.getRepresentatives().add(temp);
 		}
 	}
-	
-	
+
+	public static class Builder {
+
+		private int numberOfNodes=20;
+		private float dimensionX=1;
+		private float dimensionY=1;
+
+		public Builder(int numberOfNodes)
+		{
+			this.numberOfNodes = numberOfNodes;
+		}
+
+		public Builder withDimensions(float x, float y)
+		{
+			this.dimensionX = x;
+			this.dimensionY = y;
+
+			return this;
+		}
+
+		public nodesNetwork build()
+		{
+			nodesNetwork network = new nodesNetwork();
+			network.numberOfNodes = this.numberOfNodes;
+			network.dimensionX =  this.dimensionX;
+			network.dimensionY = this.dimensionY;
+
+			return network;
+		}
+	}
+
+	private nodesNetwork()
+	{
+
+	}
+
+
+	public void printInfo()
+	{
+		for(SensorNode node:getNodesList())
+		{
+			System.out.printf("Node id:%d x:%f y:%f\n",node.getNodeNumber(),node.getX(),node.getY());
+		}
+
+	}
 }
 	
 
