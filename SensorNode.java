@@ -9,7 +9,7 @@ public class SensorNode {
 	private float yPosition;
 	private int numberOfClass;
 	private double Pmove;
-	CacheMemory cache=new CacheMemory();
+	CacheMemory cache=new CacheMemory(3,3);
 	private Vector representatives;
 	private LinkedList<SensorNode> neighbors;
 	private Vector isRepresenting;
@@ -141,7 +141,7 @@ public class SensorNode {
 	
 	public void clearCache()
 	{
-		this.cache=new CacheMemory();
+		this.cache=new CacheMemory(3,3);
 	}
 
 	public HashMap<Integer,Measurement> getMeasurements(){return this.measurements;}
@@ -361,8 +361,8 @@ public class SensorNode {
 		double nbenefit,nbenefit2;
 		boolean found=false;
 		
-		for(i=0;i<100;i++)
-			for(j=0;j<3;j++)
+		for(i=0;i<this.cache.getHeight();i++)
+			for(j=0;j<this.cache.getWidth();j++)
 				if(this.cache.getPair(i,j)!=null && this.cache.getPair(i,j).getjnode()==Nj)
 				{
 					cacheLine[amount]=this.cache.getPair(i,j);
@@ -405,8 +405,8 @@ public class SensorNode {
 		if(benefit2>=benefit3)
 		{
 			
-			for(i=0;i<100;i++)
-				for(j=0;j<3;j++)
+			for(i=0;i<this.cache.getHeight();i++)
+				for(j=0;j<this.cache.getWidth();j++)
 					if(this.cache.getPair(i,j)!=null && this.cache.getPair(i,j).getjnode()==Nj)
 					{
 						this.cache.addPairTo(cacheLineShift[position],i,j);
@@ -428,8 +428,8 @@ public class SensorNode {
 				if(Nk==Nj)
 					continue;
 				amount=0;
-				for(i=0;i<100;i++)
-					for(j=0;j<3;j++)
+				for(i=0;i<this.cache.getHeight();i++)
+					for(j=0;j<this.cache.getWidth();j++)
 						if(this.cache.getPair(i,j)!=null && this.cache.getPair(i,j).getjnode()==Nk)
 							{
 							KcacheLine[amount]=this.cache.getPair(i,j);
@@ -471,8 +471,8 @@ public class SensorNode {
 			}
 			
 			search:
-			for(i=0;i<100;i++)
-				for(j=0;j<3;j++)
+			for(i=0;i<this.cache.getHeight();i++)
+				for(j=0;j<this.cache.getWidth();j++)
 					if(this.cache.getPair(i,j)!=null && this.cache.getPair(i,j).getjnode()==victim_line+1)
 						{
 							
@@ -485,8 +485,8 @@ public class SensorNode {
 			{
 				position=0;
 			
-				for(i=0;i<100;i++)
-					for(j=0;j<3;j++)
+				for(i=0;i<this.cache.getHeight();i++)
+					for(j=0;j<this.cache.getWidth();j++)
 						if(this.cache.getPair(i,j)!=null && this.cache.getPair(i,j).getjnode()==Nj)
 						{
 							this.cache.addPairTo(cacheLineShift[position],i,j);

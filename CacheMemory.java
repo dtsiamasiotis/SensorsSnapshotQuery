@@ -1,11 +1,16 @@
 
 public class CacheMemory {
 	int width=3;
+	int height=3;
 	private MemoryPair[][] space=new MemoryPair[100][width];
 	int amount=0;
 	
 	
-	
+	public CacheMemory(int height, int width)
+	{
+		space = new MemoryPair[height][width];
+	}
+
 	public MemoryPair getPair(int line,int place)
 	{
 		return this.space[line][place];
@@ -35,5 +40,8 @@ public class CacheMemory {
 	{
 		space[line][column]=pair;
 	}
+
+	public int getWidth(){return this.width;}
+	public int getHeight(){return this.height;}
 	
 }
