@@ -23,15 +23,15 @@ public class cacheMemoryTest {
     @Test
     public void replaceMechanism()
     {
-        CacheMemory cache = new CacheMemory(3,3);
+        CacheMemory cache = new CacheMemory(4,3);
 
         int Xi = 100;
         int Xj = 110;
-        for(int i=0;i<3;i++) {
+        for(int i=0;i<4;i++) {
             for (int k = 0; k < 3; k++) {
                 MemoryPair memPair = new MemoryPair();
                 //memPair.setinode(i);
-                memPair.setjnode(i);
+                memPair.setjnode(i+1);
                 memPair.setXi(Xi + (k * 10));
                 memPair.setXj(Xj + (k * 10));
                 cache.addPairTo(memPair, i, k);
@@ -49,15 +49,31 @@ public class cacheMemoryTest {
             memPair.setXi(120);
             memPair.setXj(150);
             memPair.setinode(1);
-            memPair.setjnode(1);
+            memPair.setjnode(3);
             node.cacheReplacement(memPair);
 
             System.out.println();
-        for(int i=0;i<3;i++) {
+        for(int i=0;i<4;i++) {
             for (int j = 0; j < 3; j++) {
                 System.out.print("{" + cache.getPair(i, j).getXi() + "," + cache.getPair(i, j).getXj() + "}");
             }
             System.out.println();
         }
+
+        MemoryPair memPair2 = new MemoryPair();
+        memPair2.setXi(120);
+        memPair2.setXj(160);
+        memPair2.setinode(1);
+        memPair2.setjnode(3);
+        node.cacheReplacement(memPair2);
+
+        System.out.println();
+        for(int i=0;i<4;i++) {
+            for (int j = 0; j < 3; j++) {
+                System.out.print("{" + cache.getPair(i, j).getXi() + "," + cache.getPair(i, j).getXj() + "}");
+            }
+            System.out.println();
+        }
+
     }
 }

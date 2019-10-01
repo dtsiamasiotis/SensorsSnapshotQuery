@@ -165,6 +165,10 @@ public class SensorNode {
 				this.neighbors.add(temp);
 
 			}
+			else
+			{
+				;
+			}
 		}
 		
 	}
