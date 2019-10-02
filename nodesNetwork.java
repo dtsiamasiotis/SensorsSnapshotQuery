@@ -15,6 +15,7 @@ public class nodesNetwork {
 	private ArrayList<SensorNode> NodesList;
 	private float broadcastedValues[][]=new float[100][100];
 	int clasum[]=new int[100];
+	private int cachePerNode;
 	
 	public ArrayList<SensorNode> getNodesList(){
 		return this.NodesList;
@@ -78,6 +79,9 @@ public class nodesNetwork {
 			networkNode.setNodeNumber(i+1);
 			networkNode.setX(number1);
 			networkNode.setY(number2);
+
+			CacheMemory newCache = new CacheMemory(this.cachePerNode);
+			networkNode.setCache(newCache);
 
 			NodesList.add(networkNode);
 		}
@@ -276,7 +280,7 @@ public class nodesNetwork {
 	//estimated with the model built from cached values.
 	public void createCandidateLists()
 	{
-		SensorNode temp,temp2;
+		/*SensorNode temp,temp2;
 		int i,j,l,o,p,n;
 		double amount=0;
 		double lastEstim=0;
@@ -315,7 +319,7 @@ public class nodesNetwork {
 					}
 			
 				}
-		}
+		}*/
 	}
 	
 	public void breakties()
@@ -396,6 +400,7 @@ public class nodesNetwork {
 		private int numberOfNodes=20;
 		private float dimensionX=1;
 		private float dimensionY=1;
+		private int cacheSize=1;
 
 		public Builder(int numberOfNodes)
 		{
@@ -410,12 +415,20 @@ public class nodesNetwork {
 			return this;
 		}
 
+		public Builder withCachePerNode(int size)
+		{
+			this.cacheSize = size;
+
+			return this;
+		}
+
 		public nodesNetwork build()
 		{
 			nodesNetwork network = new nodesNetwork();
 			network.numberOfNodes = this.numberOfNodes;
 			network.dimensionX =  this.dimensionX;
 			network.dimensionY = this.dimensionY;
+			network.cachePerNode = this.cacheSize;
 
 			return network;
 		}

@@ -12,6 +12,8 @@ public class Measurement {
         this.time = curTime;
     }
 
+    public int getTime(){ return this.time; }
+
     public float getValue()
     {
         return this.value;

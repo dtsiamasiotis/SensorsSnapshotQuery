@@ -9,14 +9,14 @@ public class SensorNode {
 	private float yPosition;
 	private int numberOfClass;
 	private double Pmove;
-	CacheMemory cache=new CacheMemory(3,3);
+	CacheMemory cache;
 	private Vector representatives;
 	private LinkedList<SensorNode> neighbors;
 	private Vector isRepresenting;
 	private Vector candidateList=new Vector();
 	private Vector receivedMeasurements;
-	private double[] aStar;
-	private double[] bStar;
+	HashMap<Integer,Double> aStar = new HashMap<Integer,Double>();
+	HashMap<Integer,Double> bStar = new HashMap<Integer,Double>();
 	private double[][] estimatedMeasurements;
 	private String status="undefined";
 	private int test=0;
@@ -29,18 +29,6 @@ public class SensorNode {
 	
 	public int getNodeNumber(){
 		return this.NodeNumber;
-	}
-	
-	public double getaStar(int pl)
-	{
-		return this.aStar[pl];
-		                  
-	}
-	
-	public double getbStar(int pl)
-	{
-		return this.bStar[pl];
-		                  
 	}
 	
 	public void setPmove(double pr){
@@ -133,15 +121,20 @@ public class SensorNode {
 	public void setReceivedMeasurements(int degrees){
 		this.receivedMeasurements.add(degrees);
 	}
+
+	public void setCache(CacheMemory cache){ this.cache = cache;}
 	
 	public void addToCache(MemoryPair pair)
 	{
-		this.cache.addPair(pair);
+		if(!this.cache.isCacheFull())
+			this.cache.addPair(pair);
+		else
+			this.cacheReplacement(pair);
 	}
 	
 	public void clearCache()
 	{
-		this.cache=new CacheMemory(3,3);
+		this.cache.clearCache();
 	}
 
 	public HashMap<Integer,Measurement> getMeasurements(){return this.measurements;}
@@ -175,8 +168,7 @@ public class SensorNode {
 	
 	//We buid a model for every node so we are able to estimate values of his neighbors.
 	public void modelBuild(){
-		aStar=new double[100];
-		bStar=new double[100];
+
 		double temp1sum = 0,temp2sum=0,temp3sum=0,temp4sum=0;
 		int i,k,Nj,j;
 		int n=0;
@@ -188,14 +180,13 @@ public class SensorNode {
 			Nj=(int)((SensorNode)(this.neighbors.get(k))).NodeNumber;
 			
 			n=0;
-			for(i=0;i<100;i++)
-				for(j=0;j<3;j++)
-					if(this.cache.getPair(i,j)!=null && this.cache.getPair(i,j).getjnode()==Nj)
-					{
-						cacheLine[n]=this.cache.getPair(i,j);
-						n++;
-					}
-			
+
+			for(MemoryPair temp:this.cache.getSpace())
+				if(temp.getjnode()==Nj)
+				{
+					cacheLine[n]=temp;
+					n++;
+				}
 			
 			
 			temp1sum=0;temp2sum=0;temp3sum=0;temp4sum=0;
@@ -217,21 +208,23 @@ public class SensorNode {
 		}
 		
 		
-		aStar[k]=(((n*temp1sum)-(temp2sum*temp3sum))/((n*temp4sum)-Math.pow(temp2sum, 2)));
-		bStar[k]=(temp3sum-(aStar[k]*temp2sum))/n;
+		double aStarValue = (((n*temp1sum)-(temp2sum*temp3sum))/((n*temp4sum)-Math.pow(temp2sum, 2)));
+		double bStarValue =( temp3sum-(aStarValue*temp2sum))/n;
 		
 		if(changed==false || n==1)
 		{
-			aStar[k]=0;
-			bStar[k]=temp3sum/n;
+			aStarValue = 0;
+			bStarValue = temp3sum/n;
 		}
-		
+
+			aStar.put(k,aStarValue);
+			bStar.put(k,bStarValue);
 		}
 		}
 	
 	public void createEstimates()
 	{	
-		this.estimatedMeasurements=new double[100][20];
+		/*this.estimatedMeasurements=new double[100][20];
 		
 		int k,i,Nj,j;
 		int n;
@@ -260,9 +253,34 @@ public class SensorNode {
 				this.estimatedMeasurements[Nj-1][i]=(aStar[k]*cacheLine[i].getXi())+bStar[k];
 			}
 			
+		}*/
+	}
+
+	public void createEstimate(int Nj)
+	{
+		MemoryPair[] cacheLine=new MemoryPair[100];
+		int n = 0;
+		for(MemoryPair temp:this.cache.getSpace())
+		{
+			if(temp.getjnode()==Nj)
+			{
+				cacheLine[n]=temp;
+				n++;
+			}
+		}
+
+		for(int i=0;i<n;i++)
+		{
+			this.estimatedMeasurements[Nj-1][i]=(aStar.get(Nj)*cacheLine[i].getXi())+bStar.get(Nj);
 		}
 	}
-	
+
+	public void updateCandindateList()
+	{
+
+	}
+
+
 	//When we have finished finding the candidate list for each node,we choose one  node
 	//from this list to be the representative. To do that, we find for each candidate node
 	//the number of nodes that have him as candidate. The node with the biggest number or the
@@ -349,7 +367,7 @@ public class SensorNode {
 		this.representatives.clear();
 	}
 	
-	public void cacheReplacement(MemoryPair pair)
+	/*public void cacheReplacement(MemoryPair pair)
 	{
 		MemoryPair[] cacheLine=new MemoryPair[100];
 		MemoryPair[] cacheLineAug=new MemoryPair[100];
@@ -501,7 +519,7 @@ public class SensorNode {
 		}
 		
 		
-	}
+	}*/
 	
 	
 	
@@ -648,12 +666,168 @@ public class SensorNode {
 
 	public void receiveMeasurementFromNetwork(int senderId, Measurement received)
 	{
-		this.updateCache(received);
-
+		MemoryPair pair = new MemoryPair();
+		pair.setjnode(senderId);
+		pair.setXj(received.getValue());
+		pair.setTime(received.getTime());
+		if(measurements.get(received.getTime())!=null) {
+			pair.setXi(measurements.get(received.getTime()).getValue());
+			this.addToCache(pair);
+		}
 	}
 
 	public void updateCache(Measurement received)
 	{
 
 	}
+
+	public void cacheReplacement(MemoryPair pair)
+	{
+		MemoryPair[] cacheLine=new MemoryPair[100];
+		MemoryPair[] cacheLineAug=new MemoryPair[100];
+		MemoryPair[] cacheLineShift=new MemoryPair[100];
+		MemoryPair[] KcacheLine=new MemoryPair[200];
+		MemoryPair[] KcacheLine2=new MemoryPair[200];
+		double[] Penalty_Evict=new double[100];
+		int Nj,Nk,i,j,x,victim_line,position=0;
+		Nj=pair.getjnode();
+
+		int amount=0;
+		double astar,bstar,astar2,bstar2,astar3,bstar3,benefit,benefit2,benefit3,Gain_Augment,smallest;
+		double nbenefit,nbenefit2;
+		boolean found=false;
+		this.cache.getSpace().sort(MemoryPair.comparatorForTime);
+
+		for(MemoryPair temp:this.cache.getSpace())
+		{
+			if(temp.getjnode()==Nj) {
+				cacheLine[amount] = temp;
+				amount++;
+			}
+		}
+		if(amount!=0)
+		{
+			for(i=0;i<amount;i++)
+			{
+				cacheLineAug[i]=cacheLine[i];
+			}
+			cacheLineAug[amount]=pair;
+
+
+			for(i=0;i<amount-1;i++)
+			{
+				cacheLineShift[i]=cacheLine[i+1];
+			}
+			cacheLineShift[amount-1]=pair;
+
+			astar=this.calculateaStar(cacheLine, amount);
+			bstar=this.calculatebStar(cacheLine, amount, astar);
+			astar2=this.calculateaStar(cacheLineShift, amount);
+			bstar2=this.calculatebStar(cacheLineShift, amount, astar2);
+			astar3=this.calculateaStar(cacheLineAug, amount+1);
+			bstar3=this.calculatebStar(cacheLineAug, amount+1, astar3);
+
+			benefit=this.no_answer_sse(cacheLineAug,amount+1)-this.calculateSse(cacheLineAug, astar, bstar, amount+1);
+			benefit2=this.no_answer_sse(cacheLineAug, amount+1)-this.calculateSse(cacheLineAug, astar2, bstar2, amount+1);
+			benefit3=this.no_answer_sse(cacheLineAug, amount+1)-this.calculateSse(cacheLineAug, astar3, bstar3, amount+1);
+
+
+			nbenefit=benefit2;
+			nbenefit2=benefit;
+
+			if(benefit>=benefit2 && benefit>=benefit3)
+				;
+
+			if(benefit2>=benefit3)
+			{
+				for(i = 0;i < this.cache.getSpace().size();i++)
+				{
+					if(this.cache.getSpace().get(i).getjnode() == Nj) {
+						this.cache.replaceMemPair(cacheLineShift[position], i);
+						position++;
+					}
+				}
+			}
+
+			Gain_Augment=benefit3-benefit2;
+			amount=0;
+			if(benefit3>benefit2)
+			{
+				for(i=0;i<Penalty_Evict.length;i++)
+					Penalty_Evict[i]=100000;
+
+
+				for(x=0;x<this.neighbors.size();x++)
+				{
+					Nk=((SensorNode)(this.neighbors.get(x))).getNodeNumber();
+
+					if(Nk==Nj)
+						continue;
+
+					amount=0;
+
+					for(MemoryPair temp:this.cache.getSpace())
+						if(temp.getjnode() == Nk)
+						{
+							KcacheLine[amount]=temp;
+							amount++;
+						}
+
+					for(i=0;i<amount-1;i++)
+					{
+						KcacheLine2[i]=KcacheLine[i+1];
+					}
+
+					astar=this.calculateaStar(KcacheLine, amount);
+					bstar=this.calculatebStar(KcacheLine, amount, astar);
+					benefit=this.no_answer_sse(KcacheLine,amount)-this.calculateSse(KcacheLine, astar, bstar, amount);
+					astar2=this.calculateaStar(KcacheLine2, amount-1);
+					bstar2=this.calculatebStar(KcacheLine2, amount-1, astar2);
+					benefit2=this.no_answer_sse(KcacheLine2,amount-1)-this.calculateSse(KcacheLine2, astar2, bstar2, amount-1);
+
+					if((benefit-benefit2)<Gain_Augment)
+					{
+						Penalty_Evict[KcacheLine[0].getjnode()-1]=benefit-benefit2;
+						found=true;
+					}
+
+				}
+
+				if(found==true)
+				{
+					smallest=Penalty_Evict[0];
+					victim_line=0;
+					for(i=0;i<Penalty_Evict.length;i++)
+					{
+						if(Penalty_Evict[i]<=smallest)
+						{
+							smallest=Penalty_Evict[i];
+							victim_line=i;
+						}
+					}
+
+					for(i = 0;i < this.cache.getSpace().size();i++)
+						if(this.cache.getSpace().get(i).getjnode() == victim_line + 1)
+						{
+							this.cache.replaceMemPair(pair,i);
+							break;
+						}
+
+				}
+				if(found==false && nbenefit>nbenefit2)
+				{
+					position=0;
+
+					for(i = 0;i < this.cache.getSpace().size();i++)
+					{
+						if(this.cache.getSpace().get(i).getjnode() == Nj) {
+							this.cache.replaceMemPair(cacheLineShift[position], i);
+							position++;
+						}
+					}
+				}
+			}
+		}
+	}
+
 }

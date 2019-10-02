@@ -1,9 +1,11 @@
+import java.util.Comparator;
 
 public class MemoryPair {
 	private float Xi;
 	private float Xj;
 	private int inode;
 	private int jnode;
+	private int time;
 	
 	public void setXi(float d)
 	{
@@ -44,5 +46,16 @@ public class MemoryPair {
 	{
 		this.jnode=value;
 	}
-	
+
+	public int getTime(){ return this.time; }
+
+	public void setTime(int time){ this.time = time;}
+
+	public static Comparator<MemoryPair> comparatorForTime = (pair1,pair2)->{return Integer.compare(pair1.time,pair2.time);};
+
+	@Override
+	public String toString()
+	{
+		return "j:"+this.getjnode()+","+"time:"+this.getTime()+","+"{" + this.getXi() + "," + this.getXj() + "}";
+	}
 }
