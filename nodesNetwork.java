@@ -58,7 +58,12 @@ public class nodesNetwork {
 			temp.setPmove(Prob[temp.getNumberOfClass()]);
 
 		}
-		
+
+		//System.out.print(numberOfClasses+"->");
+		//for(i=0;i<numberOfClasses;i++)
+		//	System.out.print(i+":"+clasum[i]+",");
+
+		//System.out.println();
 	}
 	
 	//We create a new network with as many nodes as numberOfNodes value. For each node
@@ -92,7 +97,7 @@ public class nodesNetwork {
 	public void initialize(){
 		for(SensorNode temp:NodesList)
 		{
-			temp.setRepresentatives((Vector) (temp.getNeighbors()).clone());
+		//	temp.setRepresentatives(temp.getNeighbors().clone());
 		}
 	}
 	
@@ -329,8 +334,8 @@ public class nodesNetwork {
 
 		for(SensorNode temp:NodesList)
 		{
-			temp2=(SensorNode)(temp.getRepresentatives().elementAt(0));
-			if((temp2.getRepresentatives().elementAt(0)).equals(temp)==true)
+			temp2=(SensorNode)(temp.getRepresentatives().get(0));
+			if((temp2.getRepresentatives().get(0)).equals(temp)==true)
 			{
 				state=((temp.getCandidateList().size())>=(temp2.getCandidateList().size()) && temp.getNodeNumber()>temp2.getNodeNumber())?"active":"undefined";	
 				temp.setStatus(state);
@@ -342,7 +347,7 @@ public class nodesNetwork {
 	{
 		for(SensorNode temp:NodesList)
 		{
-			if(temp.getRepresentatives().elementAt(0).equals(temp))
+			if(temp.getRepresentatives().get(0).equals(temp))
 				temp.setStatus("active");
 		}
 	}
@@ -351,7 +356,7 @@ public class nodesNetwork {
 	{
 		for(SensorNode temp:NodesList)
 		{
-			if(temp.getStatus()=="active" && temp.getRepresentatives().elementAt(0)!=temp)
+			if(temp.getStatus()=="active" && temp.getRepresentatives().get(0)!=temp)
 			{
 				temp.getRepresentatives().remove(0);
 				temp.getRepresentatives().add(temp);
@@ -368,11 +373,11 @@ public class nodesNetwork {
 		for(i=0;i<this.NodesList.size();i++)
 		{
 			temp=NodesList.get(i);
-			if(temp.getRepresentatives().elementAt(0).equals(temp)==false)
+			if(temp.getRepresentatives().get(0).equals(temp)==false)
 				for(j=0;j<this.NodesList.size();j++)
 				{
 					temp2=NodesList.get(i);
-					if(temp2.getRepresentatives().elementAt(0).equals(temp)==true)
+					if(temp2.getRepresentatives().get(0).equals(temp)==true)
 						representative=true;
 				}
 				
@@ -389,7 +394,7 @@ public class nodesNetwork {
 
 		for(SensorNode temp:NodesList)
 		{
-			if(temp.getStatus()=="active" && temp.getRepresentatives().elementAt(0).equals(temp)==false)
+			if(temp.getStatus()=="active" && temp.getRepresentatives().get(0).equals(temp)==false)
 				temp.getRepresentatives().remove(0);
 			temp.getRepresentatives().add(temp);
 		}

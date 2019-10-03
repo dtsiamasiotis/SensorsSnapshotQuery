@@ -17,12 +17,12 @@ public class MemoryPair {
 		this.Xj=value;
 	}
 	
-	public double getXi()
+	public float getXi()
 	{
 		return this.Xi;
 	}
 	
-	public double getXj()
+	public float getXj()
 	{
 		return this.Xj;
 	}

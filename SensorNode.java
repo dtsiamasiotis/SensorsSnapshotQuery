@@ -10,13 +10,13 @@ public class SensorNode {
 	private int numberOfClass;
 	private double Pmove;
 	CacheMemory cache;
-	private Vector representatives;
+	private LinkedList<SensorNode> representatives = new LinkedList<SensorNode>();
 	private LinkedList<SensorNode> neighbors;
 	private Vector isRepresenting;
-	private Vector candidateList=new Vector();
+	private LinkedList<SensorNode> candidateList=new LinkedList<SensorNode>();
 	private Vector receivedMeasurements;
-	HashMap<Integer,Double> aStar = new HashMap<Integer,Double>();
-	HashMap<Integer,Double> bStar = new HashMap<Integer,Double>();
+	HashMap<Integer,Float> aStar = new HashMap<Integer,Float>();
+	HashMap<Integer,Float> bStar = new HashMap<Integer,Float>();
 	private double[][] estimatedMeasurements;
 	private String status="undefined";
 	private int test=0;
@@ -91,17 +91,17 @@ public class SensorNode {
 		return this.estimatedMeasurements[place][time];
 	}
 	
-	public void setRepresentatives(Vector initialnodes){
-		this.representatives=new Vector();
+	public void setRepresentatives(LinkedList<SensorNode> initialnodes){
+		this.representatives=new LinkedList<SensorNode>();
 		this.representatives=initialnodes;
 		
 	}
-	public Vector getRepresentatives()
+	public LinkedList<SensorNode> getRepresentatives()
 	{
 		return this.representatives;
 	}
 	
-	public Vector getCandidateList()
+	public LinkedList<SensorNode> getCandidateList()
 	{
 		return this.candidateList;
 	}
@@ -169,7 +169,7 @@ public class SensorNode {
 	//We buid a model for every node so we are able to estimate values of his neighbors.
 	public void modelBuild(){
 
-		double temp1sum = 0,temp2sum=0,temp3sum=0,temp4sum=0;
+		float temp1sum = 0,temp2sum=0,temp3sum=0,temp4sum=0;
 		int i,k,Nj,j;
 		int n=0;
 		MemoryPair[] cacheLine=new MemoryPair[1000];
@@ -203,13 +203,13 @@ public class SensorNode {
 			temp1sum=temp1sum+(cacheLine[i].getXi()*cacheLine[i].getXj());
 			temp2sum=temp2sum+cacheLine[i].getXi();
 			temp3sum=temp3sum+cacheLine[i].getXj();
-			temp4sum=(temp4sum+Math.pow(cacheLine[i].getXi(),2));
+			temp4sum=(temp4sum+(float)Math.pow(cacheLine[i].getXi(),2));
 			
 		}
 		
 		
-		double aStarValue = (((n*temp1sum)-(temp2sum*temp3sum))/((n*temp4sum)-Math.pow(temp2sum, 2)));
-		double bStarValue =( temp3sum-(aStarValue*temp2sum))/n;
+		float aStarValue = (((n*temp1sum)-(temp2sum*temp3sum))/((n*temp4sum)-(float)Math.pow(temp2sum, 2)));
+		float bStarValue =( temp3sum-(aStarValue*temp2sum))/n;
 		
 		if(changed==false || n==1)
 		{
@@ -256,30 +256,35 @@ public class SensorNode {
 		}*/
 	}
 
-	public void createEstimate(int Nj)
+	public float createEstimate(Measurement Xj)
 	{
-		MemoryPair[] cacheLine=new MemoryPair[100];
-		int n = 0;
-		for(MemoryPair temp:this.cache.getSpace())
+		float estimate = 0;
+		int time = Xj.getTime();
+		int Nj = Xj.getNodeNumber();
+		float Xi = measurements.get(time).getValue();
+		estimate = (aStar.get(Nj)*Xi) + bStar.get(Nj);
+
+		return estimate;
+	}
+
+
+	public void compareEstimate(Measurement Xj, float estimate, float threshold)
+	{
+		float realValue = Xj.getValue();
+		float dXjXjest = (float)Math.pow(realValue-estimate,2);
+		if(dXjXjest < threshold)
 		{
-			if(temp.getjnode()==Nj)
+			for(SensorNode temp:this.neighbors)
 			{
-				cacheLine[n]=temp;
-				n++;
+				if(temp.getNodeNumber() == Xj.getNodeNumber())
+				{
+					addToCandidateList(temp);
+					break;
+				}
 			}
-		}
 
-		for(int i=0;i<n;i++)
-		{
-			this.estimatedMeasurements[Nj-1][i]=(aStar.get(Nj)*cacheLine[i].getXi())+bStar.get(Nj);
 		}
 	}
-
-	public void updateCandindateList()
-	{
-
-	}
-
 
 	//When we have finished finding the candidate list for each node,we choose one  node
 	//from this list to be the representative. To do that, we find for each candidate node
@@ -300,14 +305,14 @@ public class SensorNode {
 		SensorNode tempnode=new SensorNode();
 		SensorNode tempnode2=new SensorNode();
 		
-		this.representatives.clear();
+	//	this.representatives.clear();
 		
 		for(i=0;i<this.neighbors.size();i++)
 		{
 			tempnode=(SensorNode)(this.neighbors.get(i));
 			for(j=0;j<tempnode.candidateList.size();j++)
 			{
-				tempnode2=(SensorNode)(tempnode.candidateList.elementAt(j));
+				tempnode2=(SensorNode)(tempnode.candidateList.get(j));
 				if(tempnode2.getNodeNumber()==this.getNodeNumber())
 				{
 					offer[i][0]=tempnode.getNodeNumber();
@@ -358,7 +363,34 @@ public class SensorNode {
 		if(this.representatives.isEmpty()==true)
 			this.representatives.add(this);
 	}
-	
+
+	public void informCandidates()
+	{
+		for(SensorNode temp:candidateList)
+			temp.receiveInfoFromWannabeRepresentative(this);
+	}
+
+	public void receiveInfoFromWannabeRepresentative(SensorNode wannabeRepres)
+	{
+		if(this.representatives.isEmpty())
+			representatives.add(wannabeRepres);
+		else
+			if(representatives.get(0).getCandidateList().size() < wannabeRepres.getCandidateList().size())
+				representatives.set(0,wannabeRepres);
+			if(representatives.get(0).getCandidateList().size() == wannabeRepres.getCandidateList().size())
+			{
+				if(representatives.get(0).getNodeNumber()<wannabeRepres.getNodeNumber())
+					representatives.set(0,wannabeRepres);
+			}
+
+	}
+
+	public void checkForNoRepresentative()
+	{
+		if(this.getRepresentatives().isEmpty())
+			representatives.add(this);
+	}
+
 	public void clearVectors()
 	{
 		this.candidateList.clear();
@@ -629,7 +661,7 @@ public class SensorNode {
 		return no_answer;
 	}
 
-	public void createNewMeasurement(int curTime)
+	public Measurement createNewMeasurement(int curTime)
 	{
 		Measurement newMeasurement = new Measurement(curTime);
 		Random randomGen = new Random();
@@ -642,7 +674,15 @@ public class SensorNode {
 			newMeasurement.setValue(previousValue - curValue);
 
 		newMeasurement.setTime(curTime);
+		newMeasurement.setNodeNumber(this.getNodeNumber());
 		measurements.put(curTime,newMeasurement);
+		return newMeasurement;
+	}
+
+	public void preserveMeasurement(int time)
+	{
+		Measurement previousMeasurement = measurements.get(time-1);
+		measurements.put(time,previousMeasurement);
 	}
 
 	public void initializeNodeWithValue(int upperBound)
@@ -660,25 +700,92 @@ public class SensorNode {
 
 		for(SensorNode neighbor:this.getNeighbors())
 		{
-			neighbor.receiveMeasurementFromNetwork(this.getNodeNumber(),toBroadcast);
+			neighbor.receiveMeasurementFromNetwork(toBroadcast);
 		}
 	}
 
-	public void receiveMeasurementFromNetwork(int senderId, Measurement received)
+	public void receiveMeasurementFromNetwork(Measurement received)
 	{
 		MemoryPair pair = new MemoryPair();
-		pair.setjnode(senderId);
+		pair.setjnode(received.getNodeNumber());
 		pair.setXj(received.getValue());
 		pair.setTime(received.getTime());
 		if(measurements.get(received.getTime())!=null) {
 			pair.setXi(measurements.get(received.getTime()).getValue());
 			this.addToCache(pair);
+			this.updateModel(received.getNodeNumber());
 		}
 	}
 
 	public void updateCache(Measurement received)
 	{
 
+	}
+
+	public void updateModel(int Nj)
+	{
+		float temp1sum = 0,temp2sum=0,temp3sum=0,temp4sum=0;
+		int i,j;
+		int n=0;
+		MemoryPair[] cacheLine=new MemoryPair[1000];
+		boolean changed=false;
+
+		n=0;
+
+			for(MemoryPair temp:this.cache.getSpace())
+				if(temp.getjnode()==Nj)
+				{
+					cacheLine[n]=temp;
+					n++;
+				}
+
+
+			temp1sum=0;temp2sum=0;temp3sum=0;temp4sum=0;
+
+			for(i=1;i<n;i++)
+			{
+				if(cacheLine[i-1]!=cacheLine[i])
+					changed=true;
+			}
+
+
+			for(i=0;i<n;i++)
+			{
+				temp1sum=temp1sum+(cacheLine[i].getXi()*cacheLine[i].getXj());
+				temp2sum=temp2sum+cacheLine[i].getXi();
+				temp3sum=temp3sum+cacheLine[i].getXj();
+				temp4sum=(temp4sum+(float)Math.pow(cacheLine[i].getXi(),2));
+
+			}
+
+
+			float aStarValue = (((n*temp1sum)-(temp2sum*temp3sum))/((n*temp4sum)-(float)Math.pow(temp2sum, 2)));
+			float bStarValue =( temp3sum-(aStarValue*temp2sum))/n;
+
+			if(changed==false || n==1)
+			{
+				aStarValue = 0;
+				bStarValue = temp3sum/n;
+			}
+
+			aStar.put(Nj,aStarValue);
+			bStar.put(Nj,bStarValue);
+
+	}
+
+	public void sendInvitation(Measurement currentMeasurement)
+	{
+		for(SensorNode temp:this.neighbors)
+		{
+			temp.receiveInvitation(currentMeasurement);
+		}
+	}
+
+	public void receiveInvitation(Measurement currentMeasurement)
+	{
+		receiveMeasurementFromNetwork(currentMeasurement);
+		float estimate = createEstimate(currentMeasurement);
+		compareEstimate(currentMeasurement,estimate, 1);
 	}
 
 	public void cacheReplacement(MemoryPair pair)

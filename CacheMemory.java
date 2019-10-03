@@ -35,7 +35,7 @@ public class CacheMemory {
 	public void replaceMemPair(MemoryPair newMemPair, int index)
 	{
 		MemoryPair existingPair = this.space.get(index);
-		System.out.println("Pair replaced:"+ existingPair.toString());
+		//System.out.println("Pair replaced:"+ existingPair.toString());
 		this.space.set(index, newMemPair);
 	}
 

@@ -1,6 +1,7 @@
 public class Measurement {
     private float value;
     private int time;
+    private int nodeNumber;
 
     public void setValue(float newValue)
     {
@@ -18,6 +19,10 @@ public class Measurement {
     {
         return this.value;
     }
+
+    public void setNodeNumber(int nodeNumber){ this.nodeNumber = nodeNumber; }
+
+    public int getNodeNumber(){ return this.nodeNumber; }
 
     public Measurement(int curTime)
     {

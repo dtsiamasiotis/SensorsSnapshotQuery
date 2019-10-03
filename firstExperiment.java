@@ -1,3 +1,4 @@
+import java.util.Random;
 import java.util.Vector;
 
 public class firstExperiment extends Thread {
@@ -19,7 +20,7 @@ public class firstExperiment extends Thread {
     @Override
     public void run() {
 
-        nodesNetwork network=new nodesNetwork.Builder(100).withDimensions(1,1).build();
+        nodesNetwork network=new nodesNetwork.Builder(100).withDimensions(1,1).withCachePerNode(2048).build();
         network.createNetwork();
         for (SensorNode komvos:network.getNodesList())
         {
@@ -43,9 +44,9 @@ public class firstExperiment extends Thread {
             komvos.findNeighbors(network.getNodesList());
         }
 
-        network.initialize();
+      //  network.initialize(); is it necessary?
 
-        network.training();
+        /*network.training();
 
         for (SensorNode komvos:network.getNodesList())
         {
@@ -82,7 +83,84 @@ public class firstExperiment extends Thread {
             }
         }
 
-        represSize = repres.size();
+        represSize = repres.size();*/
+        int time = 0;
+        for(SensorNode temp:network.getNodesList())
+            temp.initializeNodeWithValue(1000);
 
+        for(time=1;time<11;time++)
+        {
+            for(SensorNode temp:network.getNodesList())
+            {
+                temp.createNewMeasurement(time);
+            }
+            for(SensorNode temp:network.getNodesList())
+            {
+                temp.broadcastMeasurement(time);
+               // temp.modelBuild();
+            }
+        }
+
+        float probability;
+        Random randomGen1 = new Random();
+
+        for(time=11;time<100;time++)
+        {
+            probability=(float)(randomGen1.nextInt(11))/10;
+
+            for(SensorNode temp:network.getNodesList()) {
+                if(probability<=temp.getPmove())
+                    temp.createNewMeasurement(time);
+                else
+                    temp.preserveMeasurement(time);
+            }
+        }
+
+
+        for(SensorNode temp:network.getNodesList())
+        {
+            Measurement newMeasurement = temp.createNewMeasurement(time);
+
+        }
+
+        for(SensorNode temp:network.getNodesList())
+        {
+            temp.sendInvitation(temp.getMeasurements().get(100));
+        }
+
+        for (SensorNode komvos:network.getNodesList())
+        {
+            System.out.print(" "+komvos.getNodeNumber()+":"+komvos.getCandidateList().size());
+        }
+
+        for (SensorNode komvos:network.getNodesList())
+        {
+            komvos.informCandidates();
+        }
+
+        for (SensorNode komvos:network.getNodesList())
+        {
+            komvos.checkForNoRepresentative();
+        }
+
+
+        network.breakties();
+        network.NoreprenentativeStayActive();
+        network.recallRedundant();
+        network.passiveMode();
+        network.finalcleanup();
+
+
+        SensorNode num;
+
+        for (SensorNode komvos:network.getNodesList())
+        {
+            num=(SensorNode)komvos.getRepresentatives().get(0);
+            if(repres.contains(num)==false){
+                repres.add(num);
+            }
+        }
+
+        represSize = repres.size();
     }
 }
