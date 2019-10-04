@@ -937,4 +937,71 @@ public class SensorNode {
 		}
 	}
 
+	public void breakties()
+	{
+		SensorNode temp2;
+		String state=new String();
+
+		//for(SensorNode temp:NodesList)
+		//{
+			temp2=(SensorNode)(this.getRepresentatives().get(0));
+			if(temp2.getRepresentatives().size()==0)
+				return;
+			else if((temp2.getRepresentatives().get(0)).equals(this)==true)
+			{
+				state=((this.getCandidateList().size())>=(temp2.getCandidateList().size()) && this.getNodeNumber()>temp2.getNodeNumber())?"active":"undefined";
+				this.setStatus(state);
+
+			}
+		//}
+	}
+	public void NoreprenentativeStayActive()
+	{
+		//for(SensorNode temp:NodesList)
+		{
+			if(this.getRepresentatives().isEmpty())
+				this.setStatus("active");
+		}
+	}
+
+	public void recallRedundant()
+	{
+		//for(SensorNode temp:NodesList)
+		{
+			if(this.getStatus()=="active" && this.getRepresentatives().get(0)!=this)
+			{
+				this.getRepresentatives().remove(0);
+				//temp.getRepresentatives().add(temp);
+			}
+		}
+
+	}
+
+	public void passiveMode()
+	{
+		boolean representative=false;
+		SensorNode temp,temp2;
+		int i,j;
+		//for(i=0;i<this.NodesList.size();i++)
+		{
+			//temp=NodesList.get(i);
+			if(!this.getRepresentatives().isEmpty())
+				for(j=0;j<this.getNeighbors().size();j++)
+				{
+					temp2=this.getNeighbors().get(j);
+					if(temp2.getRepresentatives().get(0).equals(this)==true)
+						representative=true;
+				}
+
+			if(representative==false && !this.getRepresentatives().isEmpty())
+			{
+				this.setStatus("passive");
+				this.getRepresentatives().get(0).setStatus("active");
+			}
+
+		}
+	}
+
+
+
 }

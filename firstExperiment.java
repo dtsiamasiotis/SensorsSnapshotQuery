@@ -144,23 +144,37 @@ public class firstExperiment extends Thread {
         }
 
 
-        network.breakties();
-        network.NoreprenentativeStayActive();
-        network.recallRedundant();
-        network.passiveMode();
-        network.finalcleanup();
+        while(undefinedExists(network)) {
+            network.breakties();
+            network.NoreprenentativeStayActive();
+            network.recallRedundant();
+            network.passiveMode();
+
+        }
 
 
         SensorNode num;
 
         for (SensorNode komvos:network.getNodesList())
         {
-            num=(SensorNode)komvos.getRepresentatives().get(0);
-            if(repres.contains(num)==false){
-                repres.add(num);
-            }
+
+            //num=(SensorNode)komvos.getRepresentatives().get(0);
+           // if(repres.contains(num)==false){
+            //    repres.add(num);
+           // }
+            if(komvos.getStatus().equals("active"))
+                represSize++;
         }
 
-        represSize = repres.size();
+        //represSize = repres.size();
+    }
+
+    public boolean undefinedExists(nodesNetwork network)
+    {
+        for(SensorNode temp:network.getNodesList())
+            if(temp.getStatus().equals("undefined"))
+                return true;
+
+        return false;
     }
 }

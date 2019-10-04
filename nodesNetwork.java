@@ -334,12 +334,14 @@ public class nodesNetwork {
 
 		for(SensorNode temp:NodesList)
 		{
-			temp2=(SensorNode)(temp.getRepresentatives().get(0));
-			if((temp2.getRepresentatives().get(0)).equals(temp)==true)
-			{
-				state=((temp.getCandidateList().size())>=(temp2.getCandidateList().size()) && temp.getNodeNumber()>temp2.getNodeNumber())?"active":"undefined";	
-				temp.setStatus(state);
-					
+			if(temp.getRepresentatives().size()!=0) {
+				temp2 = (SensorNode) (temp.getRepresentatives().get(0));
+				if (temp2.getRepresentatives().size() != 0)
+					if ((temp2.getRepresentatives().get(0)).equals(temp) == true) {
+						state = ((temp.getCandidateList().size()) >= (temp2.getCandidateList().size()) && temp.getNodeNumber() > temp2.getNodeNumber()) ? "active" : "undefined";
+						temp.setStatus(state);
+
+					}
 			}
 		}
 	}
@@ -347,7 +349,7 @@ public class nodesNetwork {
 	{
 		for(SensorNode temp:NodesList)
 		{
-			if(temp.getRepresentatives().get(0).equals(temp))
+			if(temp.getRepresentatives().isEmpty())
 				temp.setStatus("active");
 		}
 	}
@@ -356,10 +358,11 @@ public class nodesNetwork {
 	{
 		for(SensorNode temp:NodesList)
 		{
-			if(temp.getStatus()=="active" && temp.getRepresentatives().get(0)!=temp)
+			if(temp.getStatus()=="active" && temp.getRepresentatives().size()!=0)
 			{
-				temp.getRepresentatives().remove(0);
-				temp.getRepresentatives().add(temp);
+				if(temp.getRepresentatives().get(0)!=temp)
+					temp.getRepresentatives().remove(0);
+				//temp.getRepresentatives().add(temp);
 			}
 		}
 		
@@ -373,19 +376,21 @@ public class nodesNetwork {
 		for(i=0;i<this.NodesList.size();i++)
 		{
 			temp=NodesList.get(i);
-			if(temp.getRepresentatives().get(0).equals(temp)==false)
+			if(!temp.getRepresentatives().isEmpty())
 				for(j=0;j<this.NodesList.size();j++)
 				{
-					temp2=NodesList.get(i);
-					if(temp2.getRepresentatives().get(0).equals(temp)==true)
-						representative=true;
+					temp2=NodesList.get(j);
+					if(temp2.getRepresentatives().size()!=0)
+						if(temp2.getRepresentatives().get(0).equals(temp)==true)
+							representative=true;
 				}
 				
-		if(representative==false)
+		if(representative==false && !temp.getRepresentatives().isEmpty())
 		{
 			temp.setStatus("passive");
+			temp.getRepresentatives().get(0).setStatus("active");
 		}
-	
+			representative=false;
 		}
 		}
 	
@@ -394,9 +399,8 @@ public class nodesNetwork {
 
 		for(SensorNode temp:NodesList)
 		{
-			if(temp.getStatus()=="active" && temp.getRepresentatives().get(0).equals(temp)==false)
-				temp.getRepresentatives().remove(0);
-			temp.getRepresentatives().add(temp);
+			if(temp.getStatus()=="undefined")
+				temp.setStatus("active");
 		}
 	}
 
