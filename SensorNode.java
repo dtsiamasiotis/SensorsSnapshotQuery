@@ -825,7 +825,7 @@ public class SensorNode {
         //if(measurements.get(currentMeasurement.getTime())!=null) {
         //    pair.setXi(measurements.get(currentMeasurement.getTime()).getValue());
             //this.addToCache(pair);
-            this.updateModel(currentMeasurement.getNodeNumber());
+          //  this.updateModel(currentMeasurement.getNodeNumber());
         //}
 		float estimate = createEstimate(currentMeasurement);
 		compareEstimate(currentMeasurement,estimate, 1);
