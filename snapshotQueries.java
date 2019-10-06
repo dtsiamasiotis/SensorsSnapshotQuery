@@ -27,7 +27,7 @@ public class snapshotQueries {
 		int[] average=new int[20];
 		firstExperiment[] Tests = new firstExperiment[10];
 		
-		for(classes=10;classes<=10;classes=classes+5)
+		for(classes=1;classes<=100;classes=classes+5)
 		{
 			repres.clear();
 			repressum =0;
@@ -37,13 +37,13 @@ public class snapshotQueries {
 
 
 					
-			for(repetitions=0;repetitions<1;repetitions++)
+			for(repetitions=0;repetitions<10;repetitions++)
 			{
 				Tests[repetitions] = new firstExperiment(classes);
 				Tests[repetitions].start();
 
 			 }
-			for(repetitions=0;repetitions<1;repetitions++)
+			for(repetitions=0;repetitions<10;repetitions++)
 			{
 
 				try {
@@ -53,7 +53,7 @@ public class snapshotQueries {
 				}
 
 			}
-			for(repetitions=0;repetitions<1;repetitions++)
+			for(repetitions=0;repetitions<10;repetitions++)
 			{
 				repressum = repressum + (Tests[repetitions].getRepresSize());
 			}

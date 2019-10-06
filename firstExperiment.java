@@ -88,11 +88,18 @@ public class firstExperiment extends Thread {
         for(SensorNode temp:network.getNodesList())
             temp.initializeNodeWithValue(1000);
 
+        float probability;
+        Random randomGen1 = new Random();
+
         for(time=1;time<11;time++)
         {
+            probability=(float)(randomGen1.nextInt(11))/10;
             for(SensorNode temp:network.getNodesList())
             {
-                temp.createNewMeasurement(time);
+                if(probability<=temp.getPmove())
+                    temp.createNewMeasurement(time);
+                else
+                    temp.preserveMeasurement(time);
             }
             for(SensorNode temp:network.getNodesList())
             {
@@ -101,8 +108,7 @@ public class firstExperiment extends Thread {
             }
         }
 
-        float probability;
-        Random randomGen1 = new Random();
+
 
         for(time=11;time<100;time++)
         {
@@ -130,7 +136,7 @@ public class firstExperiment extends Thread {
 
         for (SensorNode komvos:network.getNodesList())
         {
-            System.out.print(" "+komvos.getNodeNumber()+":"+komvos.getCandidateList().size());
+     //       System.out.print(" "+komvos.getNodeNumber()+":"+komvos.getCandidateList().size());
         }
 
         for (SensorNode komvos:network.getNodesList())
@@ -140,18 +146,25 @@ public class firstExperiment extends Thread {
 
         for (SensorNode komvos:network.getNodesList())
         {
-            komvos.checkForNoRepresentative();
+   //         komvos.checkForNoRepresentative();
         }
 
+        int max_wait = 2;
 
-        while(undefinedExists(network)) {
-            network.breakties();
-            network.NoreprenentativeStayActive();
-            network.recallRedundant();
-            network.passiveMode();
+            while (undefinedExists(network)) {
+                if(max_wait==0)
+                    break;
 
-        }
+                network.breakties();
+                network.NoreprenentativeStayActive();
+                network.recallRedundant();
+                network.passiveMode();
+                max_wait--;
+            }
 
+
+
+        network.finalcleanup();
 
         SensorNode num;
 
@@ -162,8 +175,11 @@ public class firstExperiment extends Thread {
            // if(repres.contains(num)==false){
             //    repres.add(num);
            // }
-            if(komvos.getStatus().equals("active"))
+            if(komvos.getStatus().equals("active")) {
                 represSize++;
+               // System.out.print(komvos.getNodeNumber()+"|");
+
+            }
         }
 
         //represSize = repres.size();

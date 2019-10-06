@@ -46,8 +46,10 @@ public class nodesNetwork {
 		for(i=0;i<numberOfClasses;i++)
 		{
 			Prob[i]=(float)(randomGen3.nextInt(11))/10;
-			if(Prob[i]<=0.1)
+			while(Prob[i]<=0.1)
 			{Prob[i]=(float)(randomGen3.nextInt(11))/10;}
+			//{Prob[i]=randomGen3.nextFloat();}
+			//System.out.print("Pmovei:"+Prob[i]);
 		}
 
 		for(SensorNode temp:NodesList)
@@ -58,10 +60,10 @@ public class nodesNetwork {
 			temp.setPmove(Prob[temp.getNumberOfClass()]);
 
 		}
-
+		//System.out.println();
 		//System.out.print(numberOfClasses+"->");
 		//for(i=0;i<numberOfClasses;i++)
-		//	System.out.print(i+":"+clasum[i]+",");
+		//	System.out.print("Klasi i:" + i +":" +clasum[i]+",");
 
 		//System.out.println();
 	}
@@ -71,6 +73,7 @@ public class nodesNetwork {
 	public void createNetwork(){
 		Random randomGen1=new Random();
 		Random randomGen2=new Random();
+		Random randomGen3=new Random();
 		NodesList=new ArrayList<SensorNode>();
 		float number1,number2;
 		int i;
@@ -79,12 +82,15 @@ public class nodesNetwork {
 		{
 			number1=randomGen1.nextFloat();
 			number2=randomGen2.nextFloat();
+			float walkStep = 0;
+			while(walkStep==0)
+				walkStep = randomGen3.nextInt(11)/10;
 			
 			SensorNode networkNode=new SensorNode();
 			networkNode.setNodeNumber(i+1);
 			networkNode.setX(number1);
 			networkNode.setY(number2);
-
+			networkNode.setStep(walkStep);
 			CacheMemory newCache = new CacheMemory(this.cachePerNode);
 			networkNode.setCache(newCache);
 
@@ -396,12 +402,15 @@ public class nodesNetwork {
 	
 	public void finalcleanup()
 	{
-
+int toActive = 0;
 		for(SensorNode temp:NodesList)
 		{
-			if(temp.getStatus()=="undefined")
+			if(temp.getStatus()=="undefined") {
 				temp.setStatus("active");
+				toActive++;
+			}
 		}
+		//System.out.println("toActive:"+toActive);
 	}
 
 	public static class Builder {

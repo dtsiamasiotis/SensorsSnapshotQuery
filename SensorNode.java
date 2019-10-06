@@ -8,7 +8,7 @@ public class SensorNode {
 	private float xPosition;
 	private float yPosition;
 	private int numberOfClass;
-	private double Pmove;
+	private float Pmove;
 	CacheMemory cache;
 	private LinkedList<SensorNode> representatives = new LinkedList<SensorNode>();
 	private LinkedList<SensorNode> neighbors;
@@ -21,7 +21,19 @@ public class SensorNode {
 	private String status="undefined";
 	private int test=0;
 	private HashMap<Integer,Measurement> measurements = new HashMap<Integer, Measurement>();
-	
+	private int NjRoundRobin = 0;
+	private float step;
+
+	public void setStep(float step)
+    {
+        this.step = step;
+    }
+
+    public float getStep()
+    {
+        return this.step;
+    }
+
 	public void setNodeNumber(int value){
 		this.NodeNumber=value;
 	}
@@ -31,11 +43,11 @@ public class SensorNode {
 		return this.NodeNumber;
 	}
 	
-	public void setPmove(double pr){
+	public void setPmove(float pr){
 		Pmove=pr;
 	}
 	
-	public double getPmove(){
+	public float getPmove(){
 		return this.Pmove;
 	}
 	
@@ -213,8 +225,9 @@ public class SensorNode {
 		
 		if(changed==false || n==1)
 		{
-			aStarValue = 0;
-			bStarValue = temp3sum/n;
+			aStarValue = 1;
+            bStarValue=((temp3sum/n)-(aStarValue*cacheLine[0].getXi()));
+
 		}
 
 			aStar.put(k,aStarValue);
@@ -261,6 +274,7 @@ public class SensorNode {
 		float estimate = 0;
 		int time = Xj.getTime();
 		int Nj = Xj.getNodeNumber();
+		this.updateModel(Nj);
 		float Xi = measurements.get(time).getValue();
 		estimate = (aStar.get(Nj)*Xi) + bStar.get(Nj);
 
@@ -284,6 +298,8 @@ public class SensorNode {
 			}
 
 		}
+		//else
+		  //  System.out.println();
 	}
 
 	//When we have finished finding the candidate list for each node,we choose one  node
@@ -374,15 +390,14 @@ public class SensorNode {
 	{
 		if(this.representatives.isEmpty())
 			representatives.add(wannabeRepres);
-		else
-			if(representatives.get(0).getCandidateList().size() < wannabeRepres.getCandidateList().size())
-				representatives.set(0,wannabeRepres);
-			if(representatives.get(0).getCandidateList().size() == wannabeRepres.getCandidateList().size())
-			{
-				if(representatives.get(0).getNodeNumber()<wannabeRepres.getNodeNumber())
-					representatives.set(0,wannabeRepres);
-			}
-
+		else {
+            if (representatives.get(0).getCandidateList().size() < wannabeRepres.getCandidateList().size())
+                representatives.set(0, wannabeRepres);
+            if (representatives.get(0).getCandidateList().size() == wannabeRepres.getCandidateList().size()) {
+                if (representatives.get(0).getNodeNumber() < wannabeRepres.getNodeNumber())
+                    representatives.set(0, wannabeRepres);
+            }
+        }
 	}
 
 	public void checkForNoRepresentative()
@@ -562,7 +577,8 @@ public class SensorNode {
 		boolean changed=false;
 		temp1sum=0;temp2sum=0;temp3sum=0;temp4sum=0;
 		int i;
-		
+
+
 		if(amount>1)
 		{
 			for(i=1;i<amount;i++)
@@ -587,8 +603,13 @@ public class SensorNode {
 			aStar=(((amount*temp1sum)-(temp2sum*temp3sum))/((amount*temp4sum)-Math.pow(temp2sum, 2)));
 			
 		}
+		else
+        {
+            aStar = 1;
+        }
 		
-		
+		//if(aStar==0)
+		   // System.out.println();
 		return aStar;
 	}
 	
@@ -627,9 +648,13 @@ public class SensorNode {
 		
 		bStar=(temp3sum-(aStar*temp2sum))/amount;
 		}
-		if(changed==false)
+		else
 		{
-			bStar=temp3sum/amount;
+		    //if(NjLine[0]==null)
+           // {
+            //    System.out.println();
+           // }
+			bStar=((temp3sum/amount)-(aStar*NjLine[0].getXi()));
 		}
 		return bStar;
 		
@@ -665,8 +690,8 @@ public class SensorNode {
 	{
 		Measurement newMeasurement = new Measurement(curTime);
 		Random randomGen = new Random();
-		int plusminus = randomGen.nextInt(2);
-		float curValue = randomGen.nextFloat();
+		int plusminus = 0;//randomGen.nextInt(2);
+		float curValue = this.getStep();//randomGen.nextFloat();
 		float previousValue = measurements.get(curTime-1).getValue();
 		if(plusminus == 0)
 			newMeasurement.setValue(previousValue + curValue);
@@ -682,15 +707,19 @@ public class SensorNode {
 	public void preserveMeasurement(int time)
 	{
 		Measurement previousMeasurement = measurements.get(time-1);
-		measurements.put(time,previousMeasurement);
+		Measurement newMeasurement = new Measurement(time);
+		newMeasurement.setNodeNumber(previousMeasurement.getNodeNumber());
+		newMeasurement.setValue(previousMeasurement.getValue());
+		measurements.put(time,newMeasurement);
 	}
 
 	public void initializeNodeWithValue(int upperBound)
 	{
 		Measurement newMeasurement = new Measurement(0);
 		Random randomGen = new Random();
-		float initialValue = randomGen.nextFloat() * upperBound;
+		float initialValue = randomGen.nextInt(1000); //* upperBound;
 		newMeasurement.setValue(initialValue);
+		newMeasurement.setNodeNumber(this.getNodeNumber());
 		measurements.put(0,newMeasurement);
 	}
 
@@ -713,7 +742,7 @@ public class SensorNode {
 		if(measurements.get(received.getTime())!=null) {
 			pair.setXi(measurements.get(received.getTime()).getValue());
 			this.addToCache(pair);
-			this.updateModel(received.getNodeNumber());
+			//this.updateModel(received.getNodeNumber());
 		}
 	}
 
@@ -729,7 +758,7 @@ public class SensorNode {
 		int n=0;
 		MemoryPair[] cacheLine=new MemoryPair[1000];
 		boolean changed=false;
-
+        float aStarValue=0,bStarValue=0;
 		n=0;
 
 			for(MemoryPair temp:this.cache.getSpace())
@@ -744,30 +773,35 @@ public class SensorNode {
 
 			for(i=1;i<n;i++)
 			{
-				if(cacheLine[i-1]!=cacheLine[i])
-					changed=true;
+				if(cacheLine[i-1].getXi()!=cacheLine[i].getXi()) {
+                    changed = true;
+                    break;
+                }
 			}
 
+            if(changed==false || n==1)
+            {
+                aStarValue = 1;
+                for(i=0;i<n;i++)
+                {
+                    temp3sum=temp3sum+cacheLine[i].getXj();
+                }
+                //bStarValue = temp3sum/n;
+                bStarValue=((temp3sum/n)-(aStarValue*cacheLine[0].getXi()));
+            }
+            else {
+                for (i = 0; i < n; i++) {
+                    temp1sum = temp1sum + (cacheLine[i].getXi() * cacheLine[i].getXj());
+                    temp2sum = temp2sum + cacheLine[i].getXi();
+                    temp3sum = temp3sum + cacheLine[i].getXj();
+                    temp4sum = (temp4sum + (float) Math.pow(cacheLine[i].getXi(), 2));
+                }
 
-			for(i=0;i<n;i++)
-			{
-				temp1sum=temp1sum+(cacheLine[i].getXi()*cacheLine[i].getXj());
-				temp2sum=temp2sum+cacheLine[i].getXi();
-				temp3sum=temp3sum+cacheLine[i].getXj();
-				temp4sum=(temp4sum+(float)Math.pow(cacheLine[i].getXi(),2));
-
-			}
-
-
-			float aStarValue = (((n*temp1sum)-(temp2sum*temp3sum))/((n*temp4sum)-(float)Math.pow(temp2sum, 2)));
-			float bStarValue =( temp3sum-(aStarValue*temp2sum))/n;
-
-			if(changed==false || n==1)
-			{
-				aStarValue = 0;
-				bStarValue = temp3sum/n;
-			}
-
+                aStarValue = (((n * temp1sum) - (temp2sum * temp3sum)) / ((n * temp4sum) - (float) Math.pow(temp2sum, 2)));
+                bStarValue = (temp3sum - (aStarValue * temp2sum)) / n;
+            }
+            //if(Float.isNaN(aStarValue)||Float.isNaN(bStarValue))
+               // System.out.println();
 			aStar.put(Nj,aStarValue);
 			bStar.put(Nj,bStarValue);
 
@@ -783,7 +817,16 @@ public class SensorNode {
 
 	public void receiveInvitation(Measurement currentMeasurement)
 	{
-		receiveMeasurementFromNetwork(currentMeasurement);
+		//receiveMeasurementFromNetwork(currentMeasurement);
+        //MemoryPair pair = new MemoryPair();
+       // pair.setjnode(currentMeasurement.getNodeNumber());
+       // pair.setXj(currentMeasurement.getValue());
+        //pair.setTime(currentMeasurement.getTime());
+        //if(measurements.get(currentMeasurement.getTime())!=null) {
+        //    pair.setXi(measurements.get(currentMeasurement.getTime()).getValue());
+            //this.addToCache(pair);
+            this.updateModel(currentMeasurement.getNodeNumber());
+        //}
 		float estimate = createEstimate(currentMeasurement);
 		compareEstimate(currentMeasurement,estimate, 1);
 	}
@@ -808,17 +851,24 @@ public class SensorNode {
 		for(MemoryPair temp:this.cache.getSpace())
 		{
 			if(temp.getjnode()==Nj) {
-				cacheLine[amount] = temp;
-				amount++;
+                    cacheLine[amount] = temp;
+                    amount++;
+
 			}
 		}
+
 		if(amount!=0)
 		{
 			for(i=0;i<amount;i++)
 			{
-				cacheLineAug[i]=cacheLine[i];
+			    cacheLineAug[i] = cacheLine[i];
 			}
-			cacheLineAug[amount]=pair;
+			try {
+                cacheLineAug[amount]=pair;
+            }catch(Exception e)
+            {
+                ;
+            }
 
 
 			for(i=0;i<amount-1;i++)
@@ -880,6 +930,9 @@ public class SensorNode {
 							amount++;
 						}
 
+					if(amount==1)
+                        continue;
+
 					for(i=0;i<amount-1;i++)
 					{
 						KcacheLine2[i]=KcacheLine[i+1];
@@ -916,9 +969,21 @@ public class SensorNode {
 					for(i = 0;i < this.cache.getSpace().size();i++)
 						if(this.cache.getSpace().get(i).getjnode() == victim_line + 1)
 						{
+							//System.out.println(this.cache.getSpace().get(i).getXi()+","+this.cache.getSpace().get(i).getXj());
 							this.cache.replaceMemPair(pair,i);
 							break;
 						}
+					int count = 0;
+						/*for(SensorNode tempnode:this.getNeighbors()) {
+							for (MemoryPair temp : this.cache.getSpace()) {
+								if (temp.getjnode() == tempnode.getNodeNumber())
+									count++;
+							}
+							if(count==1)
+								System.out.println(tempnode.getNodeNumber());
+							count=0;
+						}*/
+
 
 				}
 				if(found==false && nbenefit>nbenefit2)
@@ -933,8 +998,76 @@ public class SensorNode {
 						}
 					}
 				}
+				else
+                {
+                    ArrayList<Integer> tempArray;
+                    boolean foundVictim = false;
+                    while(!foundVictim)
+                    {
+                        Nj = this.getNeighbors().get(NjRoundRobin).getNodeNumber();
+                        tempArray = new ArrayList<>();
+                        for (int y = 0; y < this.cache.getSpace().size(); y++) {
+                            if (this.cache.getSpace().get(y).getjnode() == Nj) {
+                                tempArray.add(y);
+                                if (tempArray.size() != 1) {
+                                    this.cache.getSpace().set(tempArray.get(0), pair);
+                                    foundVictim = true;
+                                    break;
+                                }
+                            }
+                        }
+
+
+                        NjRoundRobin++;
+                        if (NjRoundRobin == this.getNeighbors().size()) {
+                            NjRoundRobin = 0;
+                        }
+                    }
+                }
 			}
 		}
+
+		else if(amount==0) {
+
+            ArrayList<Integer> tempArray;
+            boolean foundVictim = false;
+            while(!foundVictim)
+            {
+                Nj = this.getNeighbors().get(NjRoundRobin).getNodeNumber();
+                tempArray = new ArrayList<>();
+                for (int y = 0; y < this.cache.getSpace().size(); y++) {
+                    if (this.cache.getSpace().get(y).getjnode() == Nj) {
+                        tempArray.add(y);
+                        if (tempArray.size() != 1) {
+                            this.cache.getSpace().set(tempArray.get(0), pair);
+                            foundVictim = true;
+                            break;
+                        }
+                    }
+                }
+
+
+                NjRoundRobin++;
+                if (NjRoundRobin == this.getNeighbors().size()) {
+                    NjRoundRobin = 0;
+                }
+        }
+        }
+		/*for(int kl=0;kl<this.cache.getSpace().size();kl++) {
+		    MemoryPair temp1 = this.cache.getSpace().get(kl);
+            for (int kl1 = 0; kl1 < this.cache.getSpace().size(); kl1++)
+            {
+                if(kl==kl1)
+                    continue;
+
+                MemoryPair temp2 = this.cache.getSpace().get(kl1);
+                if((temp1.getjnode()==temp2.getjnode()) && temp1.getTime()==temp2.getTime())
+                {
+                    System.out.print("duplicate");
+                }
+            }
+        }*/
+
 	}
 
 	public void breakties()
