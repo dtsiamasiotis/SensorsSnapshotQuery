@@ -1,28 +1,9 @@
 import java.util.ArrayList;
 
 public class CacheMemory {
-	int width=3;
-	int height=3;
 
 	private ArrayList<MemoryPair> space;
 	private int maxSize;
-	int amount=0;
-	
-
-
-	/*public MemoryPair getPair(int line,int place)
-	{
-		return this.space[line][place];
-	}
-
-	
-	public void addPairTo(MemoryPair pair,int line,int column)
-	{
-		space[line][column]=pair;
-	}*/
-
-	public int getWidth(){return this.width;}
-	public int getHeight(){return this.height;}
 
 	public CacheMemory(int maxSize)
 	{
@@ -35,7 +16,6 @@ public class CacheMemory {
 	public void replaceMemPair(MemoryPair newMemPair, int index)
 	{
 		MemoryPair existingPair = this.space.get(index);
-		//System.out.println("Pair replaced:"+ existingPair.toString());
 		this.space.set(index, newMemPair);
 	}
 

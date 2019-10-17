@@ -35,6 +35,7 @@ public class nodesNetworkTest {
         for(SensorNode node:network.getNodesList())
         {
             node.initializeNodeWithValue(1000);
+            node.findNeighbors(network.getNodesList());
         }
 
         for(int i=1;i<10;i++)
@@ -77,8 +78,7 @@ public class nodesNetworkTest {
             temp.findNeighbors(network.getNodesList());
         }
 
-       // for(SensorNode temp:network.getNodesList()) {
-            //findNeighbors(network.getNodesList());
+
         while(undefinedExists(network)) {
             network.breakties();
             network.NoreprenentativeStayActive();
@@ -87,8 +87,6 @@ public class nodesNetworkTest {
 
         }
 
-        //}
-       // network.finalcleanup();
         for(SensorNode temp:network.getNodesList())
             ;
     }

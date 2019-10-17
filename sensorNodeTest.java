@@ -81,7 +81,7 @@ public class sensorNodeTest {
         SensorNode node1 = new SensorNode();
         double aStar = node1.calculateaStar(Caug,2);
         double bStar = node1.calculatebStar(Caug,2,aStar);
-        assertEquals(70,bStar);
+        assertEquals(-200,bStar);
 
     }
 
@@ -170,7 +170,7 @@ public class sensorNodeTest {
         double sse = node1.calculateSse(Caug, aStarSh, bStarSh, 3);
         double noAswer = node1.no_answer_sse(Caug,3);
         double benefit = noAswer - sse;
-        assertEquals(160.333333333, benefit);
+        assertEquals(160.66666666666666, benefit);
     }
 
     @Test
@@ -202,7 +202,7 @@ public class sensorNodeTest {
         double sse = node1.calculateSse(Caug, aStarAug, bStarAug, 3);
         double noAswer = node1.no_answer_sse(Caug,3);
         double benefit = noAswer - sse;
-        assertEquals(160.666666, benefit);
+        assertEquals(160.66666666666666, benefit);
     }
 
     @Test
@@ -238,6 +238,6 @@ public class sensorNodeTest {
         double sse = node1.calculateSse(Caug, aStar, bStar, 3);
         double noAswer = node1.no_answer_sse(Caug,3);
         double benefit = noAswer - sse;
-        assertEquals(160.666666, benefit);
+        assertEquals(160.66666666666666, benefit);
     }
 }

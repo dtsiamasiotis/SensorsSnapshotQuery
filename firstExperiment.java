@@ -46,44 +46,6 @@ public class firstExperiment extends Thread {
 
       //  network.initialize(); is it necessary?
 
-        /*network.training();
-
-        for (SensorNode komvos:network.getNodesList())
-        {
-            komvos.modelBuild();
-        }
-
-        for (SensorNode komvos:network.getNodesList())
-        {
-            komvos.createEstimates();
-        }
-
-        network.createCandidateLists();
-
-        for (SensorNode komvos:network.getNodesList())
-        {
-            komvos.checkCandidateList();
-        }
-
-
-        network.breakties();
-        network.NoreprenentativeStayActive();
-        network.recallRedundant();
-        network.passiveMode();
-        network.finalcleanup();
-
-
-        SensorNode num;
-
-        for (SensorNode komvos:network.getNodesList())
-        {
-            num=(SensorNode)komvos.getRepresentatives().elementAt(0);
-            if(repres.contains(num)==false){
-                repres.add(num);
-            }
-        }
-
-        represSize = repres.size();*/
         int time = 0;
         for(SensorNode temp:network.getNodesList())
             temp.initializeNodeWithValue(1000);
@@ -134,19 +96,10 @@ public class firstExperiment extends Thread {
             temp.sendInvitation(temp.getMeasurements().get(100));
         }
 
-        for (SensorNode komvos:network.getNodesList())
-        {
-     //       System.out.print(" "+komvos.getNodeNumber()+":"+komvos.getCandidateList().size());
-        }
 
         for (SensorNode komvos:network.getNodesList())
         {
             komvos.informCandidates();
-        }
-
-        for (SensorNode komvos:network.getNodesList())
-        {
-   //         komvos.checkForNoRepresentative();
         }
 
         int max_wait = 2;
@@ -162,27 +115,17 @@ public class firstExperiment extends Thread {
                 max_wait--;
             }
 
-
-
         network.finalcleanup();
-
-        SensorNode num;
 
         for (SensorNode komvos:network.getNodesList())
         {
 
-            //num=(SensorNode)komvos.getRepresentatives().get(0);
-           // if(repres.contains(num)==false){
-            //    repres.add(num);
-           // }
             if(komvos.getStatus().equals("active")) {
                 represSize++;
-               // System.out.print(komvos.getNodeNumber()+"|");
 
             }
         }
 
-        //represSize = repres.size();
     }
 
     public boolean undefinedExists(nodesNetwork network)
