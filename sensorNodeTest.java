@@ -24,7 +24,7 @@ public class sensorNodeTest {
         MemoryPair memoryPair = new MemoryPair();
         memoryPair.setXi(newMeasurement.getValue());
         memoryPair.setXj(newMeasurement2.getValue());
-        memoryPair.setjnode(2);
+        memoryPair.setJnode(2);
         node1.addToCache(memoryPair);
         node1.updateModel(2);
         System.out.print("a:"+ node1.aStar.get(2)+","+"b:"+node1.bStar.get(2));

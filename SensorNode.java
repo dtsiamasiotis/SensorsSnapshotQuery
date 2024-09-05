@@ -12,9 +12,9 @@ public class SensorNode {
 	CacheMemory cache;
 	private LinkedList<SensorNode> representatives = new LinkedList<SensorNode>();
 	private LinkedList<SensorNode> neighbors;
-	private Vector isRepresenting;
+	//private Vector isRepresenting;
 	private LinkedList<SensorNode> candidateList=new LinkedList<SensorNode>();
-	private Vector receivedMeasurements;
+	//private Vector receivedMeasurements;
 	HashMap<Integer,Float> aStar = new HashMap<Integer,Float>();
 	HashMap<Integer,Float> bStar = new HashMap<Integer,Float>();
 	private double[][] estimatedMeasurements;
@@ -130,9 +130,9 @@ public class SensorNode {
 		this.representatives.add(this);
 	}
 	
-	public void setReceivedMeasurements(int degrees){
-		this.receivedMeasurements.add(degrees);
-	}
+	//public void setReceivedMeasurements(int degrees){
+	//	this.receivedMeasurements.add(degrees);
+	//}
 
 	public void setCache(CacheMemory cache){ this.cache = cache;}
 	
@@ -194,7 +194,7 @@ public class SensorNode {
 			n=0;
 
 			for(MemoryPair temp:this.cache.getSpace())
-				if(temp.getjnode()==Nj)
+				if(temp.getJnode()==Nj)
 				{
 					cacheLine[n]=temp;
 					n++;
@@ -546,7 +546,7 @@ public class SensorNode {
 	public void receiveMeasurementFromNetwork(Measurement received)
 	{
 		MemoryPair pair = new MemoryPair();
-		pair.setjnode(received.getNodeNumber());
+		pair.setJnode(received.getNodeNumber());
 		pair.setXj(received.getValue());
 		pair.setTime(received.getTime());
 		if(measurements.get(received.getTime())!=null) {
@@ -568,7 +568,7 @@ public class SensorNode {
 		n=0;
 
 			for(MemoryPair temp:this.cache.getSpace())
-				if(temp.getjnode()==Nj)
+				if(temp.getJnode()==Nj)
 				{
 					cacheLine[n]=temp;
 					n++;
@@ -636,7 +636,7 @@ public class SensorNode {
 		MemoryPair[] KcacheLine2=new MemoryPair[200];
 		double[] Penalty_Evict=new double[100];
 		int Nj,Nk,i,j,x,victim_line,position=0;
-		Nj=pair.getjnode();
+		Nj=pair.getJnode();
 
 		int amount=0;
 		double astar,bstar,astar2,bstar2,astar3,bstar3,benefit,benefit2,benefit3,Gain_Augment,smallest;
@@ -646,7 +646,7 @@ public class SensorNode {
 
 		for(MemoryPair temp:this.cache.getSpace())
 		{
-			if(temp.getjnode()==Nj) {
+			if(temp.getJnode()==Nj) {
                     cacheLine[amount] = temp;
                     amount++;
 
@@ -695,7 +695,7 @@ public class SensorNode {
 			{
 				for(i = 0;i < this.cache.getSpace().size();i++)
 				{
-					if(this.cache.getSpace().get(i).getjnode() == Nj) {
+					if(this.cache.getSpace().get(i).getJnode() == Nj) {
 						this.cache.replaceMemPair(cacheLineShift[position], i);
 						position++;
 					}
@@ -720,7 +720,7 @@ public class SensorNode {
 					amount=0;
 
 					for(MemoryPair temp:this.cache.getSpace())
-						if(temp.getjnode() == Nk)
+						if(temp.getJnode() == Nk)
 						{
 							KcacheLine[amount]=temp;
 							amount++;
@@ -743,7 +743,7 @@ public class SensorNode {
 
 					if((benefit-benefit2)<Gain_Augment)
 					{
-						Penalty_Evict[KcacheLine[0].getjnode()-1]=benefit-benefit2;
+						Penalty_Evict[KcacheLine[0].getJnode()-1]=benefit-benefit2;
 						found=true;
 					}
 
@@ -763,7 +763,7 @@ public class SensorNode {
 					}
 
 					for(i = 0;i < this.cache.getSpace().size();i++)
-						if(this.cache.getSpace().get(i).getjnode() == victim_line + 1)
+						if(this.cache.getSpace().get(i).getJnode() == victim_line + 1)
 						{
 							//System.out.println(this.cache.getSpace().get(i).getXi()+","+this.cache.getSpace().get(i).getXj());
 							this.cache.replaceMemPair(pair,i);
@@ -778,7 +778,7 @@ public class SensorNode {
 
 					for(i = 0;i < this.cache.getSpace().size();i++)
 					{
-						if(this.cache.getSpace().get(i).getjnode() == Nj) {
+						if(this.cache.getSpace().get(i).getJnode() == Nj) {
 							this.cache.replaceMemPair(cacheLineShift[position], i);
 							position++;
 						}
@@ -793,7 +793,7 @@ public class SensorNode {
                         Nj = this.getNeighbors().get(NjRoundRobin).getNodeNumber();
                         tempArray = new ArrayList<>();
                         for (int y = 0; y < this.cache.getSpace().size(); y++) {
-                            if (this.cache.getSpace().get(y).getjnode() == Nj) {
+                            if (this.cache.getSpace().get(y).getJnode() == Nj) {
                                 tempArray.add(y);
                                 if (tempArray.size() != 1) {
                                     this.cache.getSpace().set(tempArray.get(0), pair);
@@ -822,7 +822,7 @@ public class SensorNode {
                 Nj = this.getNeighbors().get(NjRoundRobin).getNodeNumber();
                 tempArray = new ArrayList<>();
                 for (int y = 0; y < this.cache.getSpace().size(); y++) {
-                    if (this.cache.getSpace().get(y).getjnode() == Nj) {
+                    if (this.cache.getSpace().get(y).getJnode() == Nj) {
                         tempArray.add(y);
                         if (tempArray.size() != 1) {
                             this.cache.getSpace().set(tempArray.get(0), pair);
