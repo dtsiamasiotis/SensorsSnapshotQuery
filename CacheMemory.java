@@ -158,6 +158,7 @@ public class CacheMemory {
 								Map.Entry<Integer, Double> entry = it.next();
 								if (entry.getValue() <= smallest) {
 									victim_line = entry.getKey();
+									smallest = entry.getValue();
 								}
 							}
 
@@ -193,8 +194,13 @@ public class CacheMemory {
 		}
 		else if(amount==0) {
 
-			Nj = NjRoundRobin;//.getNodeNumber();
-			space.get(Nj).remove(0);
+			while (space.get(NjRoundRobin).isEmpty()) {
+				NjRoundRobin++;
+				if (NjRoundRobin == space.size())
+					NjRoundRobin = 0;
+			}
+
+			space.get(NjRoundRobin).remove(0);
 			addPair(pair);
 
 			NjRoundRobin++;
