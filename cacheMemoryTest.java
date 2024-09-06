@@ -41,9 +41,12 @@ public class cacheMemoryTest {
         }
 
 
+        cache.getSpace().forEach(innerlist -> {
+            innerlist.stream().forEach(temp -> System.out.print("j:"+temp.getJnode()+","+"time:"+temp.getTime()+","+"{" + temp.getXi() + "," + temp.getXj() + "}|"));
+        });
 
-       /* for(MemoryPair temp:cache.getSpace())
-            System.out.print("j:"+temp.getJnode()+","+"time:"+temp.getTime()+","+"{" + temp.getXi() + "," + temp.getXj() + "}|");
+      //  for(MemoryPair temp:cache.getSpace())
+      //      System.out.print("j:"+temp.getJnode()+","+"time:"+temp.getTime()+","+"{" + temp.getXi() + "," + temp.getXj() + "}|");
 
         System.out.println();
 
@@ -57,7 +60,7 @@ public class cacheMemoryTest {
             memPair.setInode(1);
             memPair.setJnode(3);
             memPair.setTime(4);
-            node.cacheReplacement(memPair);
+            cache.cacheReplacement(memPair);
 
             System.out.println();
         for(int i=0;i<4;i++) {
@@ -65,8 +68,10 @@ public class cacheMemoryTest {
                 //System.out.print("{" + cache.getPair(i, j).getXi() + "," + cache.getPair(i, j).getXj() + "}");
             }
         }
-        for(MemoryPair temp:cache.getSpace())
-            System.out.print("j:"+temp.getJnode()+","+"time:"+temp.getTime()+","+"{" + temp.getXi() + "," + temp.getXj() + "}|");
+        cache.getSpace().forEach(innerlist -> {
+            innerlist.stream().forEach(temp -> System.out.print("j:"+temp.getJnode()+","+"time:"+temp.getTime()+","+"{" + temp.getXi() + "," + temp.getXj() + "}|"));
+        });
+
             System.out.println();
 
 
@@ -76,7 +81,7 @@ public class cacheMemoryTest {
         memPair2.setInode(1);
         memPair2.setJnode(3);
         memPair2.setTime(4);
-        node.cacheReplacement(memPair2);
+        cache.cacheReplacement(memPair2);
 
         //System.out.println();
         for(int i=0;i<4;i++) {
@@ -86,8 +91,9 @@ public class cacheMemoryTest {
             //System.out.println();
         }
 
-        for(MemoryPair temp:cache.getSpace())
-            System.out.print("j:"+temp.getJnode()+","+"time:"+temp.getTime()+","+"{" + temp.getXi() + "," + temp.getXj() + "}|");
+        cache.getSpace().forEach(innerlist -> {
+            innerlist.stream().forEach(temp -> System.out.print("j:"+temp.getJnode()+","+"time:"+temp.getTime()+","+"{" + temp.getXi() + "," + temp.getXj() + "}|"));
+        });
 
 
         MemoryPair memPair3 = new MemoryPair();
@@ -96,12 +102,13 @@ public class cacheMemoryTest {
         memPair3.setInode(1);
         memPair3.setJnode(2);
         memPair3.setTime(4);
-        node.cacheReplacement(memPair3);
+        cache.cacheReplacement(memPair3);
 
-        for(MemoryPair temp:cache.getSpace())
-            System.out.print("j:"+temp.getJnode()+","+"time:"+temp.getTime()+","+"{" + temp.getXi() + "," + temp.getXj() + "}|");
+        cache.getSpace().forEach(innerlist -> {
+            innerlist.stream().forEach(temp -> System.out.print("j:"+temp.getJnode()+","+"time:"+temp.getTime()+","+"{" + temp.getXi() + "," + temp.getXj() + "}|"));
+        });
 
         node.clearCache();
-        System.out.println();*/
+        System.out.println();
     }
 }
