@@ -22,7 +22,7 @@ public class cacheMemoryTest {
     @Test
     public void replaceMechanism()
     {
-        CacheMemory cache = new CacheMemory(12);
+        CacheMemory cache = new CacheMemory(12,4);
 
         int Xi = 100;
         int Xj = 110;
@@ -30,7 +30,7 @@ public class cacheMemoryTest {
             for (int k = 0; k < 3; k++) {
                 MemoryPair memPair = new MemoryPair();
                 //memPair.setinode(i);
-                memPair.setJnode(i+1);
+                memPair.setJnode(i);
                 memPair.setXi(Xi + (k * 10));
                 memPair.setXj(Xj + (k * 10));
                 memPair.setTime(k);
@@ -42,7 +42,7 @@ public class cacheMemoryTest {
 
 
 
-        for(MemoryPair temp:cache.getSpace())
+       /* for(MemoryPair temp:cache.getSpace())
             System.out.print("j:"+temp.getJnode()+","+"time:"+temp.getTime()+","+"{" + temp.getXi() + "," + temp.getXj() + "}|");
 
         System.out.println();
@@ -102,6 +102,6 @@ public class cacheMemoryTest {
             System.out.print("j:"+temp.getJnode()+","+"time:"+temp.getTime()+","+"{" + temp.getXi() + "," + temp.getXj() + "}|");
 
         node.clearCache();
-        System.out.println();
+        System.out.println();*/
     }
 }

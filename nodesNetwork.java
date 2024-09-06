@@ -80,11 +80,11 @@ public class nodesNetwork {
 				walkStep = randomGen3.nextInt(11)/10;
 			
 			SensorNode networkNode=new SensorNode();
-			networkNode.setNodeNumber(i+1);
+			networkNode.setNodeNumber(i);
 			networkNode.setX(number1);
 			networkNode.setY(number2);
 			networkNode.setStep(walkStep);
-			CacheMemory newCache = new CacheMemory(this.cachePerNode);
+			CacheMemory newCache = new CacheMemory(this.cachePerNode,numberOfNodes);
 			networkNode.setCache(newCache);
 
 			NodesList.add(networkNode);

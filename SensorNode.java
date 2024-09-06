@@ -23,6 +23,7 @@ public class SensorNode {
 	private HashMap<Integer,Measurement> measurements = new HashMap<Integer, Measurement>();
 	private int NjRoundRobin = 0;
 	private float step;
+	private ModelUtils modelUtils;
 
 	public void setStep(float step)
     {
@@ -141,7 +142,7 @@ public class SensorNode {
 		if(!this.cache.isCacheFull())
 			this.cache.addPair(pair);
 		else
-			this.cacheReplacement(pair);
+			cache.cacheReplacement(pair);
 	}
 	
 	public void clearCache()
@@ -179,7 +180,7 @@ public class SensorNode {
 	}
 	
 	//We buid a model for every node so we are able to estimate values of his neighbors.
-	public void modelBuild(){
+	/*public void modelBuild(){
 
 		float temp1sum = 0,temp2sum=0,temp3sum=0,temp4sum=0;
 		int i,k,Nj,j;
@@ -233,7 +234,7 @@ public class SensorNode {
 			aStar.put(k,aStarValue);
 			bStar.put(k,bStarValue);
 		}
-		}
+		}*/
 	
 
 
@@ -380,121 +381,7 @@ public class SensorNode {
 	}
 
 
-	public double calculateaStar(MemoryPair[] NjLine,int amount) 
-	{
-		double temp1sum = 0,temp2sum=0,temp3sum=0,temp4sum=0,temp5sum=0;
-		double aStar=0;
-		boolean changed=false;
-		temp1sum=0;temp2sum=0;temp3sum=0;temp4sum=0;
-		int i;
 
-
-		if(amount>1)
-		{
-			for(i=1;i<amount;i++)
-			{
-			if(NjLine[i-1].getXi()!=NjLine[i].getXi())
-				changed=true;
-			}
-		}
-		
-		if(changed==true)
-		{
-			for(i=0;i<amount;i++)
-			{
-			
-			temp1sum=temp1sum+(NjLine[i].getXi()*NjLine[i].getXj());
-			temp2sum=temp2sum+NjLine[i].getXi();
-			temp3sum=temp3sum+NjLine[i].getXj();
-			temp4sum=(temp4sum+Math.pow(NjLine[i].getXi(),2));
-			
-			}
-		
-			aStar=(((amount*temp1sum)-(temp2sum*temp3sum))/((amount*temp4sum)-Math.pow(temp2sum, 2)));
-			
-		}
-		else
-        {
-            aStar = 1;
-        }
-		
-		//if(aStar==0)
-		   // System.out.println();
-		return aStar;
-	}
-	
-	public double calculatebStar(MemoryPair[] NjLine,int amount,double aStar) 
-	{
-		double temp1sum = 0,temp2sum=0,temp3sum=0,temp4sum=0,temp5sum=0;
-		double bStar=0;
-		boolean changed=false;
-		temp1sum=0;temp2sum=0;temp3sum=0;temp4sum=0;
-		int i;
-		
-		if(amount>1)
-		{
-			for(i=1;i<amount;i++)
-			{
-			if(NjLine[i-1].getXi()!=NjLine[i].getXi())
-				changed=true;
-			}
-		}
-		
-		for(i=0;i<amount;i++)
-		{
-			temp3sum=temp3sum+NjLine[i].getXj();
-		}
-		
-		if(changed==true)
-		{
-		for(i=0;i<amount;i++)
-		{
-			temp1sum=temp1sum+(NjLine[i].getXi()*NjLine[i].getXj());
-			temp2sum=temp2sum+NjLine[i].getXi();
-			
-			temp4sum=(temp4sum+Math.pow(NjLine[i].getXi(),2));
-			
-		}
-		
-		bStar=(temp3sum-(aStar*temp2sum))/amount;
-		}
-		else
-		{
-		    //if(NjLine[0]==null)
-           // {
-            //    System.out.println();
-           // }
-			bStar=((temp3sum/amount)-(aStar*NjLine[0].getXi()));
-		}
-		return bStar;
-		
-	}
-	
-	public double calculateSse(MemoryPair[] c,double a,double b,int amount)
-	{
-		double tempsum=0,sse=0;
-		int i;
-		for(i=0;i<amount;i++)
-		{
-		tempsum=tempsum+Math.pow(c[i].getXj()-((a*c[i].getXi())+b),2);
-		}
-		
-		sse=tempsum/amount;
-		return sse;
-	}
-	
-	public double no_answer_sse(MemoryPair[] c,int amount)
-	{
-		double tempsum=0,no_answer=0;
-		int i;
-		for(i=0;i<amount;i++)
-		{
-			tempsum=tempsum+Math.pow(c[i].getXj(),2);
-		}
-		
-		no_answer=tempsum/amount;
-		return no_answer;
-	}
 
 	public Measurement createNewMeasurement(int curTime)
 	{
@@ -562,45 +449,41 @@ public class SensorNode {
 		float temp1sum = 0,temp2sum=0,temp3sum=0,temp4sum=0;
 		int i,j;
 		int n=0;
-		MemoryPair[] cacheLine=new MemoryPair[1000];
+
 		boolean changed=false;
         float aStarValue=0,bStarValue=0;
-		n=0;
-
-			for(MemoryPair temp:this.cache.getSpace())
-				if(temp.getJnode()==Nj)
-				{
-					cacheLine[n]=temp;
-					n++;
-				}
 
 
+
+			List<MemoryPair> cacheLine = cache.getSpace().get(Nj);
+			n = cacheLine.size();
 			temp1sum=0;temp2sum=0;temp3sum=0;temp4sum=0;
 
 			for(i=1;i<n;i++)
 			{
-				if(cacheLine[i-1].getXi()!=cacheLine[i].getXi()) {
+				if(cacheLine.get(i-1).getXi()!=cacheLine.get(i).getXi()) {
                     changed = true;
                     break;
                 }
 			}
 
-            if(changed==false || n==1)
+            if((!changed && n>0) || n==1)
             {
                 aStarValue = 1;
                 for(i=0;i<n;i++)
                 {
-                    temp3sum=temp3sum+cacheLine[i].getXj();
+                    temp3sum=temp3sum+cacheLine.get(i).getXj();
                 }
                 //bStarValue = temp3sum/n;
-                bStarValue=((temp3sum/n)-(aStarValue*cacheLine[0].getXi()));
+
+				bStarValue=((temp3sum/n)-(aStarValue*cacheLine.get(0).getXi()));
             }
             else {
                 for (i = 0; i < n; i++) {
-                    temp1sum = temp1sum + (cacheLine[i].getXi() * cacheLine[i].getXj());
-                    temp2sum = temp2sum + cacheLine[i].getXi();
-                    temp3sum = temp3sum + cacheLine[i].getXj();
-                    temp4sum = (temp4sum + (float) Math.pow(cacheLine[i].getXi(), 2));
+                    temp1sum = temp1sum + (cacheLine.get(i).getXi() * cacheLine.get(i).getXj());
+                    temp2sum = temp2sum + cacheLine.get(i).getXi();
+                    temp3sum = temp3sum + cacheLine.get(i).getXj();
+                    temp4sum = (temp4sum + (float) Math.pow(cacheLine.get(i).getXi(), 2));
                 }
 
                 aStarValue = (((n * temp1sum) - (temp2sum * temp3sum)) / ((n * temp4sum) - (float) Math.pow(temp2sum, 2)));
@@ -627,221 +510,7 @@ public class SensorNode {
 		compareEstimate(currentMeasurement,estimate, 1);
 	}
 
-	public void cacheReplacement(MemoryPair pair)
-	{
-		MemoryPair[] cacheLine=new MemoryPair[100];
-		MemoryPair[] cacheLineAug=new MemoryPair[100];
-		MemoryPair[] cacheLineShift=new MemoryPair[100];
-		MemoryPair[] KcacheLine=new MemoryPair[200];
-		MemoryPair[] KcacheLine2=new MemoryPair[200];
-		double[] Penalty_Evict=new double[100];
-		int Nj,Nk,i,j,x,victim_line,position=0;
-		Nj=pair.getJnode();
 
-		int amount=0;
-		double astar,bstar,astar2,bstar2,astar3,bstar3,benefit,benefit2,benefit3,Gain_Augment,smallest;
-		double nbenefit,nbenefit2;
-		boolean found=false;
-		this.cache.getSpace().sort(MemoryPair.comparatorForTime);
-
-		for(MemoryPair temp:this.cache.getSpace())
-		{
-			if(temp.getJnode()==Nj) {
-                    cacheLine[amount] = temp;
-                    amount++;
-
-			}
-		}
-
-		if(amount!=0)
-		{
-			for(i=0;i<amount;i++)
-			{
-			    cacheLineAug[i] = cacheLine[i];
-			}
-			try {
-                cacheLineAug[amount]=pair;
-            }catch(Exception e)
-            {
-                ;
-            }
-
-
-			for(i=0;i<amount-1;i++)
-			{
-				cacheLineShift[i]=cacheLine[i+1];
-			}
-			cacheLineShift[amount-1]=pair;
-
-			astar=this.calculateaStar(cacheLine, amount);
-			bstar=this.calculatebStar(cacheLine, amount, astar);
-			astar2=this.calculateaStar(cacheLineShift, amount);
-			bstar2=this.calculatebStar(cacheLineShift, amount, astar2);
-			astar3=this.calculateaStar(cacheLineAug, amount+1);
-			bstar3=this.calculatebStar(cacheLineAug, amount+1, astar3);
-
-			benefit=this.no_answer_sse(cacheLineAug,amount+1)-this.calculateSse(cacheLineAug, astar, bstar, amount+1);
-			benefit2=this.no_answer_sse(cacheLineAug, amount+1)-this.calculateSse(cacheLineAug, astar2, bstar2, amount+1);
-			benefit3=this.no_answer_sse(cacheLineAug, amount+1)-this.calculateSse(cacheLineAug, astar3, bstar3, amount+1);
-
-
-			nbenefit=benefit2;
-			nbenefit2=benefit;
-
-			if(benefit>=benefit2 && benefit>=benefit3)
-				;
-
-			if(benefit2>=benefit3)
-			{
-				for(i = 0;i < this.cache.getSpace().size();i++)
-				{
-					if(this.cache.getSpace().get(i).getJnode() == Nj) {
-						this.cache.replaceMemPair(cacheLineShift[position], i);
-						position++;
-					}
-				}
-			}
-
-			Gain_Augment=benefit3-benefit2;
-			amount=0;
-			if(benefit3>benefit2)
-			{
-				for(i=0;i<Penalty_Evict.length;i++)
-					Penalty_Evict[i]=100000;
-
-
-				for(x=0;x<this.neighbors.size();x++)
-				{
-					Nk=((SensorNode)(this.neighbors.get(x))).getNodeNumber();
-
-					if(Nk==Nj)
-						continue;
-
-					amount=0;
-
-					for(MemoryPair temp:this.cache.getSpace())
-						if(temp.getJnode() == Nk)
-						{
-							KcacheLine[amount]=temp;
-							amount++;
-						}
-
-					if(amount==1)
-                        continue;
-
-					for(i=0;i<amount-1;i++)
-					{
-						KcacheLine2[i]=KcacheLine[i+1];
-					}
-
-					astar=this.calculateaStar(KcacheLine, amount);
-					bstar=this.calculatebStar(KcacheLine, amount, astar);
-					benefit=this.no_answer_sse(KcacheLine,amount)-this.calculateSse(KcacheLine, astar, bstar, amount);
-					astar2=this.calculateaStar(KcacheLine2, amount-1);
-					bstar2=this.calculatebStar(KcacheLine2, amount-1, astar2);
-					benefit2=this.no_answer_sse(KcacheLine2,amount-1)-this.calculateSse(KcacheLine2, astar2, bstar2, amount-1);
-
-					if((benefit-benefit2)<Gain_Augment)
-					{
-						Penalty_Evict[KcacheLine[0].getJnode()-1]=benefit-benefit2;
-						found=true;
-					}
-
-				}
-
-				if(found==true)
-				{
-					smallest=Penalty_Evict[0];
-					victim_line=0;
-					for(i=0;i<Penalty_Evict.length;i++)
-					{
-						if(Penalty_Evict[i]<=smallest)
-						{
-							smallest=Penalty_Evict[i];
-							victim_line=i;
-						}
-					}
-
-					for(i = 0;i < this.cache.getSpace().size();i++)
-						if(this.cache.getSpace().get(i).getJnode() == victim_line + 1)
-						{
-							//System.out.println(this.cache.getSpace().get(i).getXi()+","+this.cache.getSpace().get(i).getXj());
-							this.cache.replaceMemPair(pair,i);
-							break;
-						}
-
-
-				}
-				if(found==false && nbenefit>nbenefit2)
-				{
-					position=0;
-
-					for(i = 0;i < this.cache.getSpace().size();i++)
-					{
-						if(this.cache.getSpace().get(i).getJnode() == Nj) {
-							this.cache.replaceMemPair(cacheLineShift[position], i);
-							position++;
-						}
-					}
-				}
-				else
-                {
-                    ArrayList<Integer> tempArray;
-                    boolean foundVictim = false;
-                    while(!foundVictim)
-                    {
-                        Nj = this.getNeighbors().get(NjRoundRobin).getNodeNumber();
-                        tempArray = new ArrayList<>();
-                        for (int y = 0; y < this.cache.getSpace().size(); y++) {
-                            if (this.cache.getSpace().get(y).getJnode() == Nj) {
-                                tempArray.add(y);
-                                if (tempArray.size() != 1) {
-                                    this.cache.getSpace().set(tempArray.get(0), pair);
-                                    foundVictim = true;
-                                    break;
-                                }
-                            }
-                        }
-
-
-                        NjRoundRobin++;
-                        if (NjRoundRobin == this.getNeighbors().size()) {
-                            NjRoundRobin = 0;
-                        }
-                    }
-                }
-			}
-		}
-
-		else if(amount==0) {
-
-            ArrayList<Integer> tempArray;
-            boolean foundVictim = false;
-            while(!foundVictim)
-            {
-                Nj = this.getNeighbors().get(NjRoundRobin).getNodeNumber();
-                tempArray = new ArrayList<>();
-                for (int y = 0; y < this.cache.getSpace().size(); y++) {
-                    if (this.cache.getSpace().get(y).getJnode() == Nj) {
-                        tempArray.add(y);
-                        if (tempArray.size() != 1) {
-                            this.cache.getSpace().set(tempArray.get(0), pair);
-                            foundVictim = true;
-                            break;
-                        }
-                    }
-                }
-
-
-                NjRoundRobin++;
-                if (NjRoundRobin == this.getNeighbors().size()) {
-                    NjRoundRobin = 0;
-                }
-        }
-        }
-
-
-	}
 
 
 }
