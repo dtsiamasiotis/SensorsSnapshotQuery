@@ -57,8 +57,8 @@ public class cacheMemoryTest {
             MemoryPair memPair = new MemoryPair();
             memPair.setXi(120);
             memPair.setXj(150);
-            memPair.setInode(1);
-            memPair.setJnode(3);
+            memPair.setInode(0);
+            memPair.setJnode(2);
             memPair.setTime(4);
             cache.cacheReplacement(memPair);
 
@@ -78,8 +78,8 @@ public class cacheMemoryTest {
         MemoryPair memPair2 = new MemoryPair();
         memPair2.setXi(120);
         memPair2.setXj(160);
-        memPair2.setInode(1);
-        memPair2.setJnode(3);
+        memPair2.setInode(0);
+        memPair2.setJnode(2);
         memPair2.setTime(4);
         cache.cacheReplacement(memPair2);
 
@@ -99,8 +99,8 @@ public class cacheMemoryTest {
         MemoryPair memPair3 = new MemoryPair();
         memPair3.setXi(130);
         memPair3.setXj(140);
-        memPair3.setInode(1);
-        memPair3.setJnode(2);
+        memPair3.setInode(0);
+        memPair3.setJnode(1);
         memPair3.setTime(4);
         cache.cacheReplacement(memPair3);
 

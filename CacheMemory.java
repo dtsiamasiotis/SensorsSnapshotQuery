@@ -72,7 +72,7 @@ public class CacheMemory {
 		//this.cache.getSpace().sort(MemoryPair.comparatorForTime);
 
 		List<MemoryPair> cacheLine = space.get(Nj);
-		if (cacheLine != null) {
+
 			if (!cacheLine.isEmpty()) {
 				{
 					LinkedList<MemoryPair> cacheLineAug = new LinkedList<>(cacheLine);
@@ -106,7 +106,7 @@ public class CacheMemory {
 					}
 
 					Gain_Augment=benefit3-benefit2;
-					amount=0;
+
 					if(benefit3>benefit2)
 					{
 						//for(i=0;i<Penalty_Evict.length;i++)
@@ -191,8 +191,8 @@ public class CacheMemory {
 					}
 				}
 			}
-		}
-		else if(amount==0) {
+
+		else {
 
 			while (space.get(NjRoundRobin).isEmpty()) {
 				NjRoundRobin++;
