@@ -39,7 +39,7 @@ public class firstExperiment extends Thread {
 
         for (SensorNode komvos:network.getNodesList())
         {
-            komvos.setrange(Math.sqrt(200));
+            komvos.setRange(Math.sqrt(200));
             komvos.clearCache();
             komvos.findNeighbors(network.getNodesList());
         }
@@ -120,7 +120,7 @@ public class firstExperiment extends Thread {
         for (SensorNode komvos:network.getNodesList())
         {
 
-            if(komvos.getStatus().equals("active")) {
+            if(komvos.getStatus() == NodeStatus.ACTIVE) {
                 represSize++;
 
             }
@@ -131,7 +131,7 @@ public class firstExperiment extends Thread {
     public boolean undefinedExists(nodesNetwork network)
     {
         for(SensorNode temp:network.getNodesList())
-            if(temp.getStatus().equals("undefined"))
+            if(temp.getStatus() == NodeStatus.UNDEFINED)
                 return true;
 
         return false;

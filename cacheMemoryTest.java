@@ -51,16 +51,16 @@ public class cacheMemoryTest {
         System.out.println();
 
         SensorNode node = network.getNodesList().get(0);
-            node.setrange(1);
+            node.setRange(1);
             node.findNeighbors(network.getNodesList());
-            node.cache = cache;
+            node.setCache(cache);
             MemoryPair memPair = new MemoryPair();
             memPair.setXi(120);
             memPair.setXj(150);
             memPair.setInode(0);
             memPair.setJnode(2);
             memPair.setTime(4);
-            cache.cacheReplacement(memPair);
+            cache.cacheReplacement(memPair,node.getNeighbors());
 
             System.out.println();
         for(int i=0;i<4;i++) {
@@ -81,7 +81,7 @@ public class cacheMemoryTest {
         memPair2.setInode(0);
         memPair2.setJnode(2);
         memPair2.setTime(4);
-        cache.cacheReplacement(memPair2);
+        cache.cacheReplacement(memPair2,node.getNeighbors());
 
         //System.out.println();
         for(int i=0;i<4;i++) {
@@ -102,7 +102,7 @@ public class cacheMemoryTest {
         memPair3.setInode(0);
         memPair3.setJnode(1);
         memPair3.setTime(4);
-        cache.cacheReplacement(memPair3);
+        cache.cacheReplacement(memPair3,node.getNeighbors());
 
         cache.getSpace().forEach(innerlist -> {
             innerlist.stream().forEach(temp -> System.out.print("j:"+temp.getJnode()+","+"time:"+temp.getTime()+","+"{" + temp.getXi() + "," + temp.getXj() + "}|"));

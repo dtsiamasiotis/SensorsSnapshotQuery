@@ -104,7 +104,7 @@ public class nodesNetwork {
 	public void breakties()
 	{
 		SensorNode temp2;
-		String state=new String();
+		NodeStatus state;
 
 		for(SensorNode temp:NodesList)
 		{
@@ -112,7 +112,7 @@ public class nodesNetwork {
 				temp2 = (SensorNode) (temp.getRepresentatives().get(0));
 				if (temp2.getRepresentatives().size() != 0)
 					if ((temp2.getRepresentatives().get(0)).equals(temp) == true) {
-						state = ((temp.getCandidateList().size()) >= (temp2.getCandidateList().size()) && temp.getNodeNumber() > temp2.getNodeNumber()) ? "active" : "undefined";
+						state = ((temp.getCandidateList().size()) >= (temp2.getCandidateList().size()) && temp.getNodeNumber() > temp2.getNodeNumber()) ? NodeStatus.ACTIVE : NodeStatus.UNDEFINED;
 						temp.setStatus(state);
 
 					}
@@ -125,7 +125,7 @@ public class nodesNetwork {
 		for(SensorNode temp:NodesList)
 		{
 			if(temp.getRepresentatives().isEmpty())
-				temp.setStatus("active");
+				temp.setStatus(NodeStatus.ACTIVE);
 		}
 	}
 	
@@ -133,7 +133,7 @@ public class nodesNetwork {
 	{
 		for(SensorNode temp:NodesList)
 		{
-			if(temp.getStatus()=="active" && temp.getRepresentatives().size()!=0)
+			if(temp.getStatus()==NodeStatus.ACTIVE && temp.getRepresentatives().size()!=0)
 			{
 				if(temp.getRepresentatives().get(0)!=temp)
 					temp.getRepresentatives().remove(0);
@@ -162,8 +162,8 @@ public class nodesNetwork {
 				
 		if(representative==false && !temp.getRepresentatives().isEmpty())
 		{
-			temp.setStatus("passive");
-			temp.getRepresentatives().get(0).setStatus("active");
+			temp.setStatus(NodeStatus.PASSIVE);
+			temp.getRepresentatives().get(0).setStatus(NodeStatus.ACTIVE);
 		}
 			representative=false;
 		}
@@ -171,11 +171,11 @@ public class nodesNetwork {
 	
 	public void finalcleanup()
 	{
-int toActive = 0;
+		int toActive = 0;
 		for(SensorNode temp:NodesList)
 		{
-			if(temp.getStatus()=="undefined") {
-				temp.setStatus("active");
+			if(temp.getStatus()==NodeStatus.UNDEFINED) {
+				temp.setStatus(NodeStatus.ACTIVE);
 				toActive++;
 			}
 		}

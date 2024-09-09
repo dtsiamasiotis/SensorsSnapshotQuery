@@ -94,7 +94,7 @@ public class nodesNetworkTest {
     public boolean undefinedExists(nodesNetwork network)
     {
         for(SensorNode temp:network.getNodesList())
-            if(temp.getStatus().equals("undefined"))
+            if(temp.getStatus() == NodeStatus.UNDEFINED)
                 return true;
 
         return false;

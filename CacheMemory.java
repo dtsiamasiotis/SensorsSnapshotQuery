@@ -1,11 +1,9 @@
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class CacheMemory {
 
 	private ArrayList<List<MemoryPair>> space;
 	private int maxSize;
-	private ModelUtils modelUtils;
 	private int NjRoundRobin = 0;
 
 	public CacheMemory(int maxSize, int maxNumberOfNeighbors)
@@ -18,19 +16,11 @@ public class CacheMemory {
 
 	public ArrayList<List<MemoryPair>> getSpace(){ return this.space;}
 
-	//public void replaceMemPair(MemoryPair newMemPair, int index)
-//	{
-	//	MemoryPair existingPair = this.space.get(index);
-	//	this.space.set(index, newMemPair);
-	//}
 
 	public void addPair(MemoryPair pair)
 	{
 		int Nj = pair.getJnode();
-
-		if (!space.isEmpty())
-			space.get(Nj).add(pair);
-
+		space.get(Nj).add(pair);
 	}
 
 	public void calculateMaxSizeOfCache(int size)
@@ -54,27 +44,22 @@ public class CacheMemory {
 		return space.stream().mapToInt(List::size).sum();
 	}
 
-	public void cacheReplacement(MemoryPair pair)
+	public void cacheReplacement(MemoryPair pair, LinkedList<SensorNode> neighbors)
 	{
-		//MemoryPair[] cacheLine=new MemoryPair[100];
-		//MemoryPair[] cacheLineAug=new MemoryPair[100];
-		//MemoryPair[] cacheLineShift=new MemoryPair[100];
-		//MemoryPair[] KcacheLine=new MemoryPair[200];
-		//MemoryPair[] KcacheLine2=new MemoryPair[200];
+
 		Map<Integer, Double> Penalty_Evict=new HashMap<>();
-		int Nj,Nk,i,j,x,victim_line,position=0;
+		int Nj,Nk,i,j,x=0;
 		Nj=pair.getJnode();
 
-		int amount=0;
-		double astar,bstar,astar2,bstar2,astar3,bstar3,benefit,benefit2,benefit3,Gain_Augment,smallest;
+
+		double astar,bstar,astar2,bstar2,astar3,bstar3,benefit,benefit2,benefit3,Gain_Augment;
 		double nbenefit,nbenefit2;
 		boolean found=false;
-		//this.cache.getSpace().sort(MemoryPair.comparatorForTime);
 
 		List<MemoryPair> cacheLine = space.get(Nj);
 
 			if (!cacheLine.isEmpty()) {
-				{
+
 					LinkedList<MemoryPair> cacheLineAug = new LinkedList<>(cacheLine);
 					cacheLineAug.addLast(pair);
 
@@ -109,16 +94,10 @@ public class CacheMemory {
 
 					if(benefit3>benefit2)
 					{
-						//for(i=0;i<Penalty_Evict.length;i++)
-							//Penalty_Evict[i]=100000;
 
-
-						for(x=0;x<space.size();x++)
+						for(x=0;x<neighbors.size();x++)
 						{
-							if (space.get(x).isEmpty())
-								continue;
-
-							Nk = space.get(x).get(0).getJnode();
+							Nk=neighbors.get(x).getNodeNumber();
 
 							if(Nk == Nj)
 								continue;
@@ -131,6 +110,7 @@ public class CacheMemory {
 
 							LinkedList<MemoryPair> KcacheLine2 = new LinkedList<>(KcacheLine);
 							KcacheLine2.removeFirst();
+
 
 							astar=ModelUtils.calculateaStar(KcacheLine);
 							bstar=ModelUtils.calculatebStar(KcacheLine, astar);
@@ -146,69 +126,56 @@ public class CacheMemory {
 							}
 
 						}
-
 						if(found)
 						{
-							smallest = 0;
-							victim_line = 0;
-
-							Iterator<Map.Entry<Integer, Double>> it = Penalty_Evict.entrySet().iterator();
-
-							while(it.hasNext()) {
-								Map.Entry<Integer, Double> entry = it.next();
-								if (entry.getValue() <= smallest) {
-									victim_line = entry.getKey();
-									smallest = entry.getValue();
-								}
-							}
-
-							space.get(victim_line).remove(0);
-							addPair(pair);
-
+							removeFromLineWithSmallestPenalty(Penalty_Evict, pair);
 						}
 						if(!found && nbenefit>nbenefit2)
 						{
 							space.set(Nj, cacheLineShift);
-						}
-						else
+						} else
 						{
-
-								while (space.get(NjRoundRobin).isEmpty()) {
-									NjRoundRobin++;
-									if (NjRoundRobin == space.size())
-										NjRoundRobin = 0;
-								}
-
-								space.get(NjRoundRobin).remove(0);
-								addPair(pair);
-
-								NjRoundRobin++;
-								if (NjRoundRobin == space.size()) {
-									NjRoundRobin = 0;
-								}
-
+							replaceMemoryInRoundRobinFashion(pair);
 						}
 					}
-				}
+
+			} else {
+				replaceMemoryInRoundRobinFashion(pair);
 			}
 
-		else {
+	}
 
-			while (space.get(NjRoundRobin).isEmpty()) {
-				NjRoundRobin++;
-				if (NjRoundRobin == space.size())
-					NjRoundRobin = 0;
-			}
-
-			space.get(NjRoundRobin).remove(0);
-			addPair(pair);
-
+	private void replaceMemoryInRoundRobinFashion(MemoryPair pair) {
+		while (space.get(NjRoundRobin).isEmpty()||space.get(NjRoundRobin).size()==1) {
 			NjRoundRobin++;
-			if (NjRoundRobin == space.size()) {
+			if (NjRoundRobin == space.size())
 				NjRoundRobin = 0;
+		}
+
+		space.get(NjRoundRobin).remove(0);
+		addPair(pair);
+
+		NjRoundRobin++;
+		if (NjRoundRobin == space.size()) {
+			NjRoundRobin = 0;
+		}
+	}
+
+	private void removeFromLineWithSmallestPenalty(Map<Integer, Double> Penalty_Evict, MemoryPair pair) {
+		double smallest = 0;
+		int victim_line = 0;
+
+		Iterator<Map.Entry<Integer, Double>> it = Penalty_Evict.entrySet().iterator();
+
+		while(it.hasNext()) {
+			Map.Entry<Integer, Double> entry = it.next();
+			if (entry.getValue() <= smallest) {
+				victim_line = entry.getKey();
+				smallest = entry.getValue();
 			}
 		}
 
-
+		space.get(victim_line).remove(0);
+		addPair(pair);
 	}
 }

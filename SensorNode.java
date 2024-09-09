@@ -1,73 +1,41 @@
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.*;
 import java.lang.*;
 import java.math.*;
 
 public class SensorNode {
+	@Getter
+	@Setter
 	private int NodeNumber;
+	@Getter
+	@Setter
 	private double range;
 	private float xPosition;
 	private float yPosition;
 	private int numberOfClass;
+	@Getter
+	@Setter
 	private float Pmove;
-	CacheMemory cache;
+	@Getter
+	@Setter
+	private CacheMemory cache;
 	private LinkedList<SensorNode> representatives = new LinkedList<SensorNode>();
 	private LinkedList<SensorNode> neighbors;
-	//private Vector isRepresenting;
 	private LinkedList<SensorNode> candidateList=new LinkedList<SensorNode>();
-	//private Vector receivedMeasurements;
 	HashMap<Integer,Float> aStar = new HashMap<Integer,Float>();
 	HashMap<Integer,Float> bStar = new HashMap<Integer,Float>();
 	private double[][] estimatedMeasurements;
-	private String status="undefined";
-	private int test=0;
+	@Getter
+	@Setter
+	private NodeStatus status = NodeStatus.UNDEFINED;
 	private HashMap<Integer,Measurement> measurements = new HashMap<Integer, Measurement>();
-	private int NjRoundRobin = 0;
+	@Getter
+	@Setter
 	private float step;
 	private ModelUtils modelUtils;
 
-	public void setStep(float step)
-    {
-        this.step = step;
-    }
-
-    public float getStep()
-    {
-        return this.step;
-    }
-
-	public void setNodeNumber(int value){
-		this.NodeNumber=value;
-	}
-	
-	
-	public int getNodeNumber(){
-		return this.NodeNumber;
-	}
-	
-	public void setPmove(float pr){
-		Pmove=pr;
-	}
-	
-	public float getPmove(){
-		return this.Pmove;
-	}
-	
-	public void setrange(double rang)
-	{
-		this.range=rang;
-	}
-	
-	public double getrange()
-	{
-		return this.range;
-	}
-	public void setStatus(String state){
-		status=state;
-	}
-	
-	public String getStatus(){
-		return this.status;
-	}
 	
 	public void setX(float number1){
 		this.xPosition=number1;
@@ -142,7 +110,7 @@ public class SensorNode {
 		if(!this.cache.isCacheFull())
 			this.cache.addPair(pair);
 		else
-			cache.cacheReplacement(pair);
+			cache.cacheReplacement(pair,neighbors);
 	}
 	
 	public void clearCache()

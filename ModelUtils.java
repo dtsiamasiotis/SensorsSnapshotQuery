@@ -15,12 +15,14 @@ public class ModelUtils {
         {
             for(i=1;i<lineSize;i++)
             {
-                if(NjLine.get(i-1).getXi()!=NjLine.get(i).getXi())
-                    changed=true;
+                if(NjLine.get(i-1).getXi()!=NjLine.get(i).getXi()) {
+                    changed = true;
+                    break;
+                }
             }
         }
 
-        if(changed==true)
+        if(changed)
         {
             for(i=0;i<lineSize;i++)
             {
@@ -57,8 +59,10 @@ public class ModelUtils {
         {
             for(i=1;i<lineSize;i++)
             {
-                if(NjLine.get(i-1).getXi()!=NjLine.get(i).getXi())
-                    changed=true;
+                if(NjLine.get(i-1).getXi()!=NjLine.get(i).getXi()) {
+                    changed = true;
+                    break;
+                }
             }
         }
 
@@ -67,7 +71,7 @@ public class ModelUtils {
             temp3sum=temp3sum+NjLine.get(i).getXj();
         }
 
-        if(changed==true)
+        if(changed)
         {
             for(i=0;i<lineSize;i++)
             {
