@@ -81,12 +81,12 @@ public class nodesNetwork {
 			
 			SensorNode networkNode=new SensorNode();
 			networkNode.setNodeNumber(i);
-			networkNode.setX(number1);
-			networkNode.setY(number2);
+			networkNode.setXPosition(number1);
+			networkNode.setYPosition(number2);
 			networkNode.setStep(walkStep);
 			CacheMemory newCache = new CacheMemory(this.cachePerNode,numberOfNodes);
 			networkNode.setCache(newCache);
-
+			networkNode.setModel(new Model());
 			NodesList.add(networkNode);
 		}
 		
@@ -108,10 +108,10 @@ public class nodesNetwork {
 
 		for(SensorNode temp:NodesList)
 		{
-			if(temp.getRepresentatives().size()!=0) {
-				temp2 = (SensorNode) (temp.getRepresentatives().get(0));
-				if (temp2.getRepresentatives().size() != 0)
-					if ((temp2.getRepresentatives().get(0)).equals(temp) == true) {
+			if(!temp.getRepresentatives().isEmpty()) {
+				temp2 = temp.getRepresentatives().getFirst();
+				if (!temp2.getRepresentatives().isEmpty())
+					if ((temp2.getRepresentatives().getFirst()).equals(temp)) {
 						state = ((temp.getCandidateList().size()) >= (temp2.getCandidateList().size()) && temp.getNodeNumber() > temp2.getNodeNumber()) ? NodeStatus.ACTIVE : NodeStatus.UNDEFINED;
 						temp.setStatus(state);
 
@@ -133,10 +133,10 @@ public class nodesNetwork {
 	{
 		for(SensorNode temp:NodesList)
 		{
-			if(temp.getStatus()==NodeStatus.ACTIVE && temp.getRepresentatives().size()!=0)
+			if(temp.getStatus()==NodeStatus.ACTIVE && !temp.getRepresentatives().isEmpty())
 			{
-				if(temp.getRepresentatives().get(0)!=temp)
-					temp.getRepresentatives().remove(0);
+				if(temp.getRepresentatives().getFirst()!=temp)
+					temp.getRepresentatives().removeFirst();
 				//temp.getRepresentatives().add(temp);
 			}
 		}
@@ -155,12 +155,12 @@ public class nodesNetwork {
 				for(j=0;j<this.NodesList.size();j++)
 				{
 					temp2=NodesList.get(j);
-					if(temp2.getRepresentatives().size()!=0)
-						if(temp2.getRepresentatives().get(0).equals(temp)==true)
+					if(!temp2.getRepresentatives().isEmpty())
+						if(temp2.getRepresentatives().get(0).equals(temp))
 							representative=true;
 				}
 				
-		if(representative==false && !temp.getRepresentatives().isEmpty())
+		if(!representative && !temp.getRepresentatives().isEmpty())
 		{
 			temp.setStatus(NodeStatus.PASSIVE);
 			temp.getRepresentatives().get(0).setStatus(NodeStatus.ACTIVE);
@@ -231,7 +231,7 @@ public class nodesNetwork {
 	{
 		for(SensorNode node:getNodesList())
 		{
-			System.out.printf("Node id:%d x:%f y:%f\n",node.getNodeNumber(),node.getX(),node.getY());
+			System.out.printf("Node id:%d x:%f y:%f\n",node.getNodeNumber(),node.getXPosition(),node.getYPosition());
 		}
 
 	}

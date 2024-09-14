@@ -12,7 +12,11 @@ public class SensorNode {
 	@Getter
 	@Setter
 	private double range;
+	@Getter
+	@Setter
 	private float xPosition;
+	@Getter
+	@Setter
 	private float yPosition;
 	private int numberOfClass;
 	@Getter
@@ -24,8 +28,6 @@ public class SensorNode {
 	private LinkedList<SensorNode> representatives = new LinkedList<SensorNode>();
 	private LinkedList<SensorNode> neighbors;
 	private LinkedList<SensorNode> candidateList=new LinkedList<SensorNode>();
-	HashMap<Integer,Float> aStar = new HashMap<Integer,Float>();
-	HashMap<Integer,Float> bStar = new HashMap<Integer,Float>();
 	private double[][] estimatedMeasurements;
 	@Getter
 	@Setter
@@ -34,24 +36,10 @@ public class SensorNode {
 	@Getter
 	@Setter
 	private float step;
-	private ModelUtils modelUtils;
+	@Getter
+	@Setter
+	private Model model;
 
-	
-	public void setX(float number1){
-		this.xPosition=number1;
-	}
-	
-	public float getX(){
-		return this.xPosition;
-	}
-	
-	public void setY(float number2){
-		this.yPosition=number2;
-	}
-	
-	public double getY(){
-		return this.yPosition;
-	}
 	
 	public void setNumberOfClass(int number)
 	{
@@ -91,8 +79,7 @@ public class SensorNode {
 	{
 		this.candidateList.add(anode);
 	}
-	
-	
+
 	
 	public void setMyself()
 	{
@@ -103,8 +90,6 @@ public class SensorNode {
 	//	this.receivedMeasurements.add(degrees);
 	//}
 
-	public void setCache(CacheMemory cache){ this.cache = cache;}
-	
 	public void addToCache(MemoryPair pair)
 	{
 		if(!this.cache.isCacheFull())
@@ -133,15 +118,11 @@ public class SensorNode {
 			if(temp.getNodeNumber() == this.getNodeNumber())
 				continue;
 
-			distance=Math.sqrt(Math.pow((this.getX()-temp.getX()),2)+Math.pow((this.getY()-temp.getY()), 2));
+			distance=Math.sqrt(Math.pow((this.getXPosition()-temp.getXPosition()),2)+Math.pow((this.getYPosition()-temp.getYPosition()), 2));
 			if(distance<range)
 			{
 				this.neighbors.add(temp);
 
-			}
-			else
-			{
-				;
 			}
 		}
 		
@@ -213,7 +194,7 @@ public class SensorNode {
 		int Nj = Xj.getNodeNumber();
 		this.updateModel(Nj);
 		float Xi = measurements.get(time).getValue();
-		estimate = (aStar.get(Nj)*Xi) + bStar.get(Nj);
+		estimate = (model.aStar.get(Nj)*Xi) + model.bStar.get(Nj);
 
 		return estimate;
 	}
@@ -310,7 +291,7 @@ public class SensorNode {
 			tempnode.candidateList.remove(this);
 			}
 			}
-		if(this.representatives.isEmpty()==true)
+		if(this.representatives.isEmpty())
 			this.representatives.add(this);
 	}
 
@@ -325,10 +306,10 @@ public class SensorNode {
 		if(this.representatives.isEmpty())
 			representatives.add(wannabeRepres);
 		else {
-            if (representatives.get(0).getCandidateList().size() < wannabeRepres.getCandidateList().size())
+            if (representatives.getFirst().getCandidateList().size() < wannabeRepres.getCandidateList().size())
                 representatives.set(0, wannabeRepres);
-            if (representatives.get(0).getCandidateList().size() == wannabeRepres.getCandidateList().size()) {
-                if (representatives.get(0).getNodeNumber() < wannabeRepres.getNodeNumber())
+            if (representatives.getFirst().getCandidateList().size() == wannabeRepres.getCandidateList().size()) {
+                if (representatives.getFirst().getNodeNumber() < wannabeRepres.getNodeNumber())
                     representatives.set(0, wannabeRepres);
             }
         }
@@ -345,7 +326,7 @@ public class SensorNode {
 		this.candidateList.clear();
 		//this.neighbors.clear();
 		if(this.representatives!=null)
-		this.representatives.clear();
+			this.representatives.clear();
 	}
 
 
@@ -414,54 +395,7 @@ public class SensorNode {
 
 	public void updateModel(int Nj)
 	{
-		float temp1sum = 0,temp2sum=0,temp3sum=0,temp4sum=0;
-		int i,j;
-		int n=0;
-
-		boolean changed=false;
-        float aStarValue=0,bStarValue=0;
-
-
-
-			List<MemoryPair> cacheLine = cache.getSpace().get(Nj);
-			n = cacheLine.size();
-			temp1sum=0;temp2sum=0;temp3sum=0;temp4sum=0;
-
-			for(i=1;i<n;i++)
-			{
-				if(cacheLine.get(i-1).getXi()!=cacheLine.get(i).getXi()) {
-                    changed = true;
-                    break;
-                }
-			}
-
-            if((!changed && n>0) || n==1)
-            {
-                aStarValue = 1;
-                for(i=0;i<n;i++)
-                {
-                    temp3sum=temp3sum+cacheLine.get(i).getXj();
-                }
-                //bStarValue = temp3sum/n;
-
-				bStarValue=((temp3sum/n)-(aStarValue*cacheLine.get(0).getXi()));
-            }
-            else {
-                for (i = 0; i < n; i++) {
-                    temp1sum = temp1sum + (cacheLine.get(i).getXi() * cacheLine.get(i).getXj());
-                    temp2sum = temp2sum + cacheLine.get(i).getXi();
-                    temp3sum = temp3sum + cacheLine.get(i).getXj();
-                    temp4sum = (temp4sum + (float) Math.pow(cacheLine.get(i).getXi(), 2));
-                }
-
-                aStarValue = (((n * temp1sum) - (temp2sum * temp3sum)) / ((n * temp4sum) - (float) Math.pow(temp2sum, 2)));
-                bStarValue = (temp3sum - (aStarValue * temp2sum)) / n;
-            }
-            //if(Float.isNaN(aStarValue)||Float.isNaN(bStarValue))
-               // System.out.println();
-			aStar.put(Nj,aStarValue);
-			bStar.put(Nj,bStarValue);
-
+		model.updateModel(Nj, cache);
 	}
 
 	public void sendInvitation(Measurement currentMeasurement)
@@ -477,8 +411,5 @@ public class SensorNode {
 		float estimate = createEstimate(currentMeasurement);
 		compareEstimate(currentMeasurement,estimate, 1);
 	}
-
-
-
 
 }
